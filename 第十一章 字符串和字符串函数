@@ -1,0 +1,51 @@
+#include<stdio.h>
+#define S 10 
+int main(void)
+/*{
+	char name[10];
+	scanf("%s",name);	//获取单词，空格后不记录 ，回车结束输入 
+	printf("%s",name);
+	
+	char words[S];
+	int i;
+	puts("enter strings");	//输出字符串，双引号，自带回车 
+	putchar('1');	//输出单个字符，使用单引号 ,不带回车
+	printf("确认\n"); 
+//	gets(words);	
+	//不会检查是否越界，多余的字符占用其他内存，易擦写其他数据
+	//输入字符串过长，会导致缓冲区溢出 
+	//gets同样自带回车 
+	fgets(words,S,stdin); 
+	//第二个参数S限制读入的字符数来解决溢出，读入S-1个字符或换行符结束
+	//读到换行符，会存储在字符串中。而gets()会丢弃换行符
+	//第三个参数指明读入的文件，stdin-读入从键盘输入的数据  
+//	printf("%s\n",words);
+	puts(words); 
+	fputs(words,stdout);	//不会自动换行 
+	
+	return 0;
+}
+*/
+{
+	char words[S];
+	int i;
+	puts("enter strings");
+//	fgets(words,S,stdin);
+//	fputs(words,stdout);
+	while(fgets(words,S,stdin)!=NULL && words[0]!='\n')
+	{
+		i=0;
+		while(words[i]!='\n'&&words[i]!='\0')
+		i++;
+		if(words[i]=='\n')
+		words[i]='\0';
+	//while判断到\n换行符时跳出，if判断是否为\n，是就替换为空字符 ，不是就为空字符，执行else 
+		else	//如果words[i]=='\0'则执行这段代码 
+		while(getchar()!='\n')
+		continue;
+		//先遇到空字符，else语段便丢弃输入行的剩余字符 
+		puts(words);
+	}
+	puts("done");
+	return 0;
+}
