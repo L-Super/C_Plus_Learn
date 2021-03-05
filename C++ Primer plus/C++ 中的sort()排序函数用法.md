@@ -77,12 +77,12 @@ sort(Stu,Stu+100,cmp2);
 
 缺点：也只是实现简单的排序，结构体不适用。
 
-\#include <iostream>
-\#include <cstdio>
-\#include <algorithm>
-\#include <functional>
+**#include <iostream>**
+**#include <cstdio>**
+**#include <algorithm>**
+**#include <functional>**
+**using namespace std;** 
 
-using namespace std;
 //简单使用方法
 sort(A,A+100,greater<int>());//降序排列
 sort(A,A+100,less<int>());//升序排列
