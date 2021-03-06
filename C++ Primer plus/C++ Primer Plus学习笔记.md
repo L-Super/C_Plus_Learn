@@ -1,5 +1,25 @@
 # C++ Primer Plus学习笔记
 
+## 内存模型和名称空间
+
+### 编译
+
+**头文件管理**
+
+在同一个文件中只能将同一个头文件包含一次。
+
+基于预处理器编译指令**#ifndef(if not defined)**，可以避免多次包含同一个头文件。
+
+如果在同一个文件中遇到其他包含coordin.h的代码，编译器就知道COORDIN_H_已经被定义了，从而跳到#endif之后。没有定义的时候，才处理**#ifndef 和 #endif**之间的语句。
+
+```c++
+#ifndef COORDIN_H_
+#define COORDIN_H_
+#endif
+```
+
+
+
 ## 引用
 
 ### 引用 vs 指针
