@@ -291,3 +291,89 @@ int main() {
 类的**析构函数**是类的一种特殊的成员函数，它会在每次删除所创建的对象时执行。
 
 析构函数的名称与类的名称是完全相同的，只是在前面加了个波浪号（~）作为前缀，它不会返回任何值，也不能带有任何参数。析构函数有助于在跳出程序（比如关闭文件、释放内存等）前释放资源。
+
+
+
+## 模板
+
+泛型编程主要就是利用模板
+
+模板机制有函数模板和类模板
+
++ template \<typename type>
++ template \<class type>
+
+```c++
+//函数模板
+//声明模板，告诉T不报错，是一个通用数据类型
+template<typename T>
+void Swap_template(T &a,T &b)
+{
+    ...
+}
+```
+
+两种方式使用函数模板
+
+```c++
+//1.自动类型推导
+	Swap_template(a, b);
+
+//2.显示指定类型
+	Swap_template<int>(a, b);
+```
+
+​	
+
+### 类模板
+
+1. 类模板没有自动类型推导使用方式
+2. 类模板在模板参数列表中可以有默认参数
+
+使用类模板时，如果在模板外写实现时，模板的名字要加上类型
+
+```c++
+template<class NameType,class AgeType>
+class Person
+{
+public:
+	Person(NameType name, AgeType age);
+	NameType m_name;
+	AgeType m_age;
+	void showPerson();
+};
+//需要如下写，才能通过编译
+template<class NameType, class AgeType>
+Person<NameType, AgeType>::Person(NameType name,AgeType age)
+{
+	this->m_name = name;
+	this->m_age = age;
+	
+}
+template<class NameType, class AgeType>
+void Person<NameType, AgeType>::showPerson()
+{
+	cout << "name: " << this->m_name 
+        << "age: " << this->m_age << endl;
+}
+```
+
+模板的实现和声明，尽量放在一个文件里，分开麻烦，这个和类定义不一样。
+
+类模板在模板参数列表中可以有默认参数:
+
+```c++
+template<class NameType,class AgeType=int>//加上int
+class Person
+{
+public:
+	Person(NameType name, AgeType age);
+}
+void test3()
+{
+	Person<string> p1("孙悟空", 999);
+    //template<class NameType,class AgeType=int>加上int后，即可不显示指定int类型
+    //只有类模板才可这样使用
+}
+```
+
