@@ -1,5 +1,45 @@
 # C++ Primer Plus学习笔记
 
+## 指针
+
+对指针可以执行加减运算
+指针加1是加上一个基类型的长度
+指针减1是减掉一个基类型的长度
+如：
+
+```c++
+int a,*pi=&a;
+double b,*pd=&b;
+++pi;	//pi的值增加4
+++pd;	//pd的值增加8
+```
+
+```c++
+int main()
+{
+	using namespace std;
+	short dates[4]{1,2,3,4}, * pti, index;
+	double bills[4]{}, * ptf;
+	
+	cout<<"          \t\t  short  \t \t double \n";
+	for (index = 0; index < 4; index++)
+		cout << " array:  index:"<< index << " dates + index: " <<int(dates + index) << " bills + index: "<<
+		int(bills + index) << endl;
+	pti = dates;
+	ptf = bills;
+	cout << "               short \t double\n";
+		
+	for (index = 0; index < 4; index++)
+		cout<<"pointers+"<< index << "   " << int(pti + index) <<"\t"<<
+			int(ptf + index) << endl;
+	return 0;
+}
+```
+
+![image-20210326190938690](C++ Primer Plus学习笔记.assets/image-20210326190938690.png)
+
+即，short型数组加上1个基型长度2，double型数组为加8个基型长度，**dates + index**与**pti + index**等效，即由dates[0]变为dates[1]
+
 ## 内存模型和名称空间
 
 ### 编译
