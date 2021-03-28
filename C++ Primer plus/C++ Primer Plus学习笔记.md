@@ -334,7 +334,7 @@ int main() {
 
 
 
-## 模板
+## 模板 (template)
 
 泛型编程主要就是利用模板
 
@@ -362,8 +362,6 @@ void Swap_template(T &a,T &b)
 //2.显示指定类型
 	Swap_template<int>(a, b);
 ```
-
-​	
 
 ### 类模板
 
@@ -417,3 +415,19 @@ void test3()
 }
 ```
 
+## STL (Standard Template Library)
+
+### STL六大组件简介
+
+容器、算法、迭代器、仿函数、适配器、分配器
+
+![image-20210328220745040](C++ Primer Plus学习笔记.assets/image-20210328220745040.png)
+
++ 容器（Containers）：各种数据结构，如Vector,List,Deque,Set,Map,用来存放数据
++ 算法（Algorithms）：各种常用算法如Sort,Search,Copy,Erase,从实现的角度来看，STL算法是一种Function Templates。
++ 迭代器（Iterators）：用来在一个对象群集（collection of objects）的元素上进行遍历。这个对象群集或许是个容器，或许是容器的一部分。迭代器的主要好处是，为所有容器提供了一组很小的公共接口。
++ 仿函数（Functors）： 行为类似函数，可作为算法的某种策略（Policy）,从实现的角度来看，仿函数是一种重载了Operator()的Class 或 Class Template。一般函数指针可视为狭义的仿函数。
++ 配接器（适配器）（Adapters）：一种用来修饰容器（Containers）或仿函数（Functors）或迭代器（Iterators）接口的东西，为已有的类提供新的接口，目的是简化、约束、使之安全、隐藏或者改变被修改类提供的服务集合。
++ 分配器（Allocators）：负责空间配置与管理，从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的Class Template。
+
+![image-20210328225735142](C++ Primer Plus学习笔记.assets/image-20210328225735142.png)
