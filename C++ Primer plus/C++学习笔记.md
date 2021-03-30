@@ -1,4 +1,4 @@
-# C++ Primer Plus学习笔记
+# C++学习笔记
 
 ## 指针
 
@@ -36,13 +36,13 @@ int main()
 }
 ```
 
-![image-20210326190938690](C++ Primer Plus学习笔记.assets/image-20210326190938690.png)
+![image-20210326190938690](C++学习笔记.assets/image-20210326190938690.png)
 
 即，short型数组加上1个基型长度2，double型数组为加8个基型长度，**dates + index**与**pti + index**等效，即由dates[0]变为dates[1]
 
 ## 内存模型和名称空间
 
-### 编译
+### 预处理
 
 **头文件管理**
 
@@ -58,7 +58,21 @@ int main()
 #endif
 ```
 
+预处理变量有两种状态：已定义和未定义。
 
+#define指令把一个名字设定为预处理变量，另外两个指令则分别检查某个指定的预处理变量是否已经定义：
+
+**#ifdef**当且仅当变量已定义时为真，
+
+**#ifndef**当且仅当变量未定义时为真。
+
+一旦检查结果为真，则执行后续操作直至遇到#endif指令为止。
+
+第一次包含coordin.h时，#ifndef的检查结果为真，预处理器将顺序执行后面的操作直至遇到#endif为止。此时，预处理变量SALES_DATA_H的值将变为已定义，而且coordin.h也会被拷贝到我们的程序中来。
+
+后面如果再一次包含coordin.h，则#ifndef的检查结果将为假，编译器将忽略#ifndef到#endif之间的部分。
+
+整个程序中的预处理变量包括**头文件保护符必须唯一**，通常的做法是基于头文件中类的名字来构建保护符的名字，以确保其唯一性。为了避免与程序中的其他实体发生名字冲突，**一般把预处理变量的名字全部大写**。
 
 ## 引用
 
@@ -415,13 +429,98 @@ void test3()
 }
 ```
 
+####  类模板对象做函数参数
+
+一共有三种传入方式：
+
+1. 指定传入的类型   --- 直接显示对象的数据类型
+2. 参数模板化           --- 将对象中的参数变为模板进行传递
+3. 整个类模板化       --- 将这个对象类型 模板化进行传递
+
+**示例：**
+
+```C++
+#include <string>
+//类模板
+template<class NameType, class AgeType = int> 
+class Person
+{
+public:
+	Person(NameType name, AgeType age)
+	{
+		this->mName = name;
+		this->mAge = age;
+	}
+	void showPerson()
+	{
+		cout << "name: " << this->mName << " age: " << this->mAge << endl;
+	}
+public:
+	NameType mName;
+	AgeType mAge;
+};
+
+//1、指定传入的类型
+void printPerson1(Person<string, int> &p) 
+{
+	p.showPerson();
+}
+void test01()
+{
+	Person <string, int >p("孙悟空", 100);
+	printPerson1(p);
+}
+
+//2、参数模板化
+template <class T1, class T2>
+void printPerson2(Person<T1, T2>&p)
+{
+	p.showPerson();
+    //typeid可查看类型
+	cout << "T1的类型为： " << typeid(T1).name() << endl;
+	cout << "T2的类型为： " << typeid(T2).name() << endl;
+}
+void test02()
+{
+	Person <string, int >p("猪八戒", 90);
+	printPerson2(p);
+}
+
+//3、整个类模板化
+template<class T>
+void printPerson3(T & p)
+{
+	cout << "T的类型为： " << typeid(T).name() << endl;
+	p.showPerson();
+
+}
+void test03()
+{
+	Person <string, int >p("唐僧", 30);
+	printPerson3(p);
+}
+
+int main() {
+	test01();
+	test02();
+	test03();
+	system("pause");
+	return 0;
+}
+```
+
+总结：
+
+* 通过类模板创建的对象，可以有三种方式向函数中进行传参
+* 使用比较广泛是第一种：指定传入的类型
+
 ## STL (Standard Template Library)
 
 ### STL六大组件简介
 
 容器、算法、迭代器、仿函数、适配器、分配器
 
-![image-20210328220745040](C++ Primer Plus学习笔记.assets/image-20210328220745040.png)
+![image-20210328220745040](C++学习笔记.assets/image-20210328220745040.png)
 
 + 容器（Containers）：各种数据结构，如Vector,List,Deque,Set,Map,用来存放数据
 + 算法（Algorithms）：各种常用算法如Sort,Search,Copy,Erase,从实现的角度来看，STL算法是一种Function Templates。
@@ -430,4 +529,4 @@ void test3()
 + 配接器（适配器）（Adapters）：一种用来修饰容器（Containers）或仿函数（Functors）或迭代器（Iterators）接口的东西，为已有的类提供新的接口，目的是简化、约束、使之安全、隐藏或者改变被修改类提供的服务集合。
 + 分配器（Allocators）：负责空间配置与管理，从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的Class Template。
 
-![image-20210328225735142](C++ Primer Plus学习笔记.assets/image-20210328225735142.png)
+![image-20210328225735142](C++学习笔记.assets/image-20210328225735142.png)
