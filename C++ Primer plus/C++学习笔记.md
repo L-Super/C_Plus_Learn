@@ -542,7 +542,7 @@ int main() {
 | String s1              | 默认初始化，s1是空串                                  |
 | String s2(s1)          | s2是s1的副本                                          |
 | String s2=s1           | 等价于s2(s1),s2是s1的副本                             |
-| String s1=("abc")      | s1是字面值"value"的副本，除了字面值最后的那个空字符外 |
+| String s1("abc")       | s1是字面值"value"的副本，除了字面值最后的那个空字符外 |
 | String s1="abc"        | 等价于s1("value"),s1是字面值"value"的副本             |
 | String s1(n,'a')       | 把s1初始化为由连续n个字符c组成的串                    |
 
@@ -670,15 +670,63 @@ cctype头文件中的函数
 
 C++11新标准提供的一种语句：范围for (range for)语句。这种语句遍历给定序列中的每个元素并对序列中的每个值执行某种操作， 其语法形式是：
 
+```c++
+for(declaration : expression)
+	statement
+```
 
 
+其中，**declaration** 负责定义一个变量， 用于访问序列中的基础元素。每次迭代，**declaration**变量会被初始化为 **expression**的下一个元素值。**expression**是一个对象， 用于表示一个序列。
 
+```c++
+string str("some string"); 
+//每行检出str中的一个字符，
+for (auto c : str) 
+COUt<< c << endl; 
+```
 
+此例中，通过使用**auto**关键字让编译器来决定变量c的类型，这里c的类型是char。
 
+统计string对象中标点符号的个数
 
+```C++
+string s ("Hello World!!!"); 
+// punct_cnt的类型和s.size的返回类型一样；
+decltype(s.size()) punct_cnt = 0; 
+//统计标点符号数量
+for (auto c : s) 
+    if (ispunct (c))//对于s中的每个字符，如果该字符是标点符号 
+        ++punct_cnt;//将标点符号的计数值加
+cout << punct_cnt <<" punctuation characters in"<< s << endl;
+```
 
+使用decltype关键字，声明计数变量punct_cnt， 它的类型是s.size函数返回值的类型，也就是string::size_type。
 
+**使用范围for语句改变字符串中的字符**
 
+如果想要改变string对象中字符的值，必须把循环变量定义成引用类型
 
++ 把字符串改写为大写字母
 
+```c++
+string s("hello,world!!！");
+//转换成大写形式
+for (auto &c : s) //对于s中的每个字符（注意:C是引用）
+c = toupper(c); //C是一个引用，因此赋值语句将改变s中字符的值
+cout << s << endl;
+```
+
+上述代码的输出结果将是：HELLO WORLD ! ! ! 
+
+每次迭代时，变量**c**引用**string**对象s的下一个字符，赋值给**c**也就是在改变**s**中对应字符的值。
+
+**想访问string对象中的单个字符**
+
+有两种方式： 一种是使用下标， 另外一种是使用迭代器。
+下标运算符（［］）接收的输入参数是string::size_type类型的值， 这个参数表示要访问的字符的位置； 返回值是该位置上字符的引用。
+
+```c++
+if (! s. empty()) 
+cout << s [O] << endl;//输出 s的笫一个字符
+```
 
