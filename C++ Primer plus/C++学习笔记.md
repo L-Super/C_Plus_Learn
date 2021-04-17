@@ -54,31 +54,7 @@ This GDB was configured as "i486-linux-gnu"...
 
 `-g`选项的作用是在可执行文件中加入源代码的信息，比如可执行文件中第几条机器指令对应源代码的第几行，但并不是把整个源文件嵌入到可执行文件中，所以在调试时必须保证`gdb`能找到源文件。
 
-`gdb`提供一个类似Shell的命令行环境，上面的`(gdb)`就是提示符，在这个提示符下输入`help`可以查看命令的类别：
-
-```shell
-(gdb) help
-List of classes of commands:
- 
-aliases -- Aliases of other commands
-breakpoints -- Making program stop at certain points
-data -- Examining data
-files -- Specifying and examining files
-internals -- Maintenance commands
-obscure -- Obscure features
-running -- Running the program
-stack -- Examining the stack
-status -- Status inquiries
-support -- Support facilities
-tracepoints -- Tracing of program execution without stopping the program
-user-defined -- User-defined commands
- 
-Type "help" followed by a class name for a list of commands in that class.
-Type "help all" for the list of all commands.
-Type "help" followed by command name for full documentation.
-Type "apropos word" to search for commands related to "word".
-Command name abbreviations are allowed if unambiguous.
-```
+`gdb`提供一个类似Shell的命令行环境，上面的`(gdb)`就是提示符，在这个提示符下输入`help`可以查看命令的类别。
 
 也可以进一步查看某一类别中有哪些命令，例如查看`files`类别下有哪些命令可用：
 
@@ -87,19 +63,6 @@ Command name abbreviations are allowed if unambiguous.
 Specifying and examining files.
  
 List of commands:
- 
-add-shared-symbol-files -- Load the symbols from shared objects in the dynamic linker's link map
-add-symbol-file -- Load symbols from FILE
-add-symbol-file-from-memory -- Load the symbols out of memory from a dynamically loaded object file
-cd -- Set working directory to DIR for debugger and program being debugged
-core-file -- Use FILE as core dump for examining memory and registers
-directory -- Add directory DIR to beginning of search path for source files
-edit -- Edit specified file or function
-exec-file -- Use FILE as program for getting contents of pure memory
-file -- Use FILE as program to be debugged
-forward-search -- Search for regular expression (see regex(3)) from last line listed
-generate-core-file -- Save a core file with the current state of the debugged process
-list -- List specified function or line
 ...
 ```
 
@@ -819,7 +782,7 @@ Program received signal SIGSEGV, Segmentation fault.
 
 `gdb`指出，段错误发生在第19行。可是这一行什么都没有啊，只有表示`main`函数结束的}括号。这可以算是一条规律，*如果某个函数的局部变量发生访问越界，有可能并不立即产生段错误，而是在函数返回时产生段错误*。
 
-想要写出Bug-free的程序是非常不容易的，即使`scanf`读入字符串这么一个简单的函数调用都会隐藏着各种各样的错误，有些错误现象是我们暂时没法解释的：为什么变量`i`的存储单元紧跟在`input`数组后面？为什么同样是访问越界，有时出段错误有时不出段错误？为什么访问越界的段错误在函数返回时才出现？还有最基本的问题，为什么`scanf`输入整型变量就必须要加&，否则就出段错误，而输入字符串就不要加&？这些问题在后续章节中都会解释清楚。其实现在讲`scanf`这个函数为时过早，读者还不具备充足的基础知识。但还是有必要讲的，学完这一阶段之后读者应该能写出有用的程序了，然而一个只有输出而没有输入的程序算不上是有用的程序，另一方面也让读者认识到，学C语言不可能不去了解底层计算机体系结构和操作系统的原理，不了解底层原理连一个`scanf`函数都没办法用好，更没有办法保证写出正确的程序。
+
 
 
 
