@@ -1332,6 +1332,35 @@ int main() {
 | String s1="abc"        | 等价于s1("value"),s1是字面值"value"的副本             |
 | String s1(n,'a')       | 把s1初始化为由连续n个字符c组成的串                    |
 
+**初始化，赋值等等操作的方式原理是string的构造函数，运算符重载实现**
+
+构造函数原型：
+
+* `string();`          				//创建一个空的字符串 例如: string str;
+  `string(const char* s);`	        //使用字符串s初始化
+* `string(const string& str);`    //使用一个string对象初始化另一个string对象
+* `string(int n, char c);`           //使用n个字符c初始化 
+
+赋值的函数原型：
+
+* `string& operator=(const char* s);`             //char*类型字符串 赋值给当前的字符串
+* `string& operator=(const string &s);`         //把字符串s赋给当前的字符串
+* `string& operator=(char c);`                          //字符赋值给当前的字符串
+* `string& assign(const char *s);`                  //把字符串s赋给当前的字符串
+* `string& assign(const char *s, int n);`     //把字符串s的前n个字符赋给当前的字符串
+* `string& assign(const string &s);`              //把字符串s赋给当前字符串
+* `string& assign(int n, char c);`                  //用n个字符c赋给当前字符串
+
+**字符串拼接函数原型：**
+
+* `string& operator+=(const char* str);`                   //重载+=操作符
+* `string& operator+=(const char c);`                         //重载+=操作符
+* `string& operator+=(const string& str);`                //重载+=操作符
+* `string& append(const char *s); `                               //把字符串s连接到当前字符串结尾
+* `string& append(const char *s, int n);`                 //把字符串s的前n个字符连接到当前字符串结尾
+* `string& append(const string &s);`                           //同operator+=(const string& str)
+* `string& append(const string &s, int pos, int n);`//字符串s中从pos开始的n个字符连接到字符串结尾
+
 #### 直接初始化和默认初始化
 
 如果使用等号（=)初始化一个变量，实际上执行的是拷贝初始化（copy initialization),编译器把等号右侧的初始值拷贝到新创建的对象中去。
