@@ -1697,6 +1697,16 @@ if (! s. empty())
 cout << s [O] << endl;//输出 s的笫一个字符
 ```
 
+成员函数at()
+
+```c++
+string str = "hello world";
+cout << str.at(2) << endl;//访问第2个字符，即'l'
+str.at(1) = 'x';//字符修改,"hxllo world"
+```
+
+
+
 ### Vector
 
 标准库类型vector表示对象的集合， 其中所有对象的类型都相同。集合中的每个对象都有一个与之对应的索引，索引用于访问对象。
