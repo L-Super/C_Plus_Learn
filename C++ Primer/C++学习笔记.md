@@ -1976,3 +1976,105 @@ cout << item1+ item2 << endl;
 如果ISBN不一样，就会抛出异常，该异常是类型runtime_error的对象。抛出异常将终止当前的函数，并把控制权转移给能处理该异常的代码。
 
 类型runtime_error是标准库异常类型的一种，定义在stdexcept头文件中。
+
+### try语句块
+
+try语句块的通用语法形式是
+
+```c++
+try {
+	program-statements
+} catch (exception-declaration ){
+	handler-statements
+}catch (exception-declaration){
+	handler-statements
+}//...
+```
+
+try块之后的是一个或多个 catch子句。 catch子句包括三部分:关键字catch、括号内一个(可能未命名的)对象的声明（称作异常声明, exception declaration）以及一个块。当选中了某个 catch子句处理异常之后,执行与之对应的块。 catch一旦完成,程序跳转到try语句块最后一个 catch子句之后的那条语句继续执行。
+
+```c++
+while(cin>>item1>>item2){
+    try{
+        //执行添加两个Sales_item对象的代码
+        //如果添加失败，代码抛出一个runtime_error异常
+    }catch(runtime_error err){
+        //提醒用户两个ISBN必须一致，询问是否重新输入
+        cout<<err.what()<<"\nTry Again?Enter y or n"<<endl;
+        char c;
+        cin>>c;
+        if(!cin||c=='n')
+            break;//跳出while循环
+    }
+}
+```
+
+此try语句块对应一个 catch子句，该子句负责处理类型为 runtime error的异常。如果try语句块的代码抛出了 runtime error异常，接下来执行 catch块内的语句。在 catch子句中，输岀一段信息询问用户是否继续。如果用户输入′n’，执行 break语句并退出 while循环；否则，直接执行 while循环的右侧花括号，意味着程序控制权跳回到while条件部分准备下一次迭代。
+
+给用户的提示信息中输出了err.what()的返回值。err的类型是runtime_error，因此能推断what是 runtime_error类的一个成员函数。每个标准库异常类都定义了名为what的成员函数,这些函数没有参数,返回值是C风格字符串(即 const char*)。其中, runtime_error的what成员返回的是初始化一个具体对象时所用的 string对象的副本。
+
+综合示例：
+
+```c++
+#include<iostream>
+#include<stdexcept>//需要包含头文件，才能使用异常处理
+using namespace std;
+int main()
+{
+	int a,b=0;
+	//cout<<a<<b<<endl;
+	cout<<"input two num"<<endl;
+	try{
+		cin>>a>>b;
+		if(b==0)
+		throw runtime_error("data cant be 0");
+		cout<<"a/b= "<<a/b<<endl;
+	}catch(runtime_error err){
+		cout<<err.what()<<"\nwrong"<<endl;
+	}
+	return 0;
+ } 
+```
+
+
+
+### 标准异常
+
+C++标准库定义了一组类，用于报告标准库函数遇到的问题。这些异常类分别定义在4个头文件中：
+
++ exception头文件定义了最通用的异常类 exception。它只报告异常的发生，不提供任何额外信息。
++ stdexcept头文件定义了几种常用的异常类
++ new头文件定义了bad_alloc异常类型。
++ type_info头文件定义了 bad_cast异常类型。
+
+| < stdexcept>定义的异常类 |                                               |
+| ------------------------ | --------------------------------------------- |
+| exception                | 最常见的问题                                  |
+| runtime error            | 只有在运行时才能检测出的问题                  |
+| range_error              | 运行时错误:生成的结果超出了有意义的值域范围   |
+| overflow_error           | 运行时错误:计算上溢                           |
+| underflow_error          | 运行时错误:计算下溢                           |
+| logic_error              | 程序逻辑错误                                  |
+| domain_error             | 逻辑错误:参数对应的结果值不存在               |
+| invalid_argument         | 逻辑错误:无效参数                             |
+| length_error             | 逻辑错误:试图创建一个超出该类型最大长度的对象 |
+| out_of_range             | 逻辑错误:使用一个超出有效范围的值             |
+
+标准库异常类只定义了几种运算，包括创建或拷贝异常类型的对象，以及为异常类型的对象赋值。
+
+我们只能以**默认初始化**的方式初始化 **exception、bad_alloc和 bad_cast**对象，不允许为这些对象提供初始值。
+
+其他异常类型的行为则恰好相反：应该使用 **string对象或者C风格字符串初始化**这些类型的对象，但是不允许使用默认初始化的方式。当创建此类对象时，必须提供初始值，该初始值含有错误相关的信息。
+
+
+
+
+
+
+
+
+
+
+
+
+
