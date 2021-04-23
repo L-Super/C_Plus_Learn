@@ -1947,3 +1947,32 @@ while (mid ! = end && *mid ! = sought) {
 }
 ```
 
+## try和异常处理
+
+异常是指存在千运行时的反常行为， 这些行为超出了函数正常功能的范围。典型的异常包括失去数据库连接以及遇到意外输入等。
+
+异常处理包括：
+
++ throw表达式(throw expression), 异常检测部分使用throw表达式来表示它遇到了无法处理的问题。我们说throw引发(raise)了异常。
++ try语句块(try block), 异常处理部分使用try语句块处理异常。try语句块以关键字try开始，并以一个或多个catch子句(catch clause)结束。try语句块中代码抛出的异常通常会被某个catch子句处理。因为catch子句“处理”异常，所以它们也被称作异常处理代码(exception handler)。
++ 一套异常类(exceptionclass), 用千在throw表达式和相关的catch子句之间传递异常的具体信息。
+
+### throw表达式
+
+程序的异常检测部分使用throw表达式引发一个异常。throw表达式包含关键字 throw和紧随其后的一个表达式，其中表达式的类型就是抛出的异常类型。throw表达式后面通常紧跟一个分号，从而构成一条表达式语句。
+
+把两个Sales_itern对象相加的程序。＜五勺这个程序检查它读入的记录是否是关千同一种书籍的，如果不是，输出一条信息然后退出。
+
+```c++
+Sales_item item1,item2; 
+cin >> item1 >> item2;
+//首先检查两条数据是否是关于同一种书籍的
+if (iteml.isbn() != item2.isbn()) 
+	throw runtime_error("Data must refer to same ISBN"); 
+//如果程序执行到了这里，表示两个ISBN是相同的
+cout << item1+ item2 << endl; 
+```
+
+如果ISBN不一样，就会抛出异常，该异常是类型runtime_error的对象。抛出异常将终止当前的函数，并把控制权转移给能处理该异常的代码。
+
+类型runtime_error是标准库异常类型的一种，定义在stdexcept头文件中。
