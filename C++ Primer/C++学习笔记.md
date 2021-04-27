@@ -980,6 +980,226 @@ int main(void)
 
 `p`指向`.rodata`段，不允许改写，但编译器不会报错，在运行时会出现段错误。
 
+## 函数
+
+### 函数指针
+
+在C语言中，函数也是一种类型，可以定义指向函数的指针。
+
+**函数指针**
+
+```c
+#include <stdio.h>
+ 
+void say_hello(const char *str)
+{
+    printf("Hello %s\n", str);
+}
+ 
+int main(void)
+{
+    void (*f)(const char *) = say_hello;
+    f("Guys");
+    return 0;
+}
+```
+
+分析一下变量`f`的类型声明`void (*f)(const char *)`，`f`首先跟`*`号结合在一起，因此是一个指针。`(*f)`外面是一个函数原型的格式，参数是`const char *`，返回值是`void`，所以`f`是指向这种函数的指针。
+
+而`say_hello`的参数是`const char *`，返回值是`void`，正好是这种函数，因此`f`可以指向`say_hello`。注意，`say_hello`是一种函数类型，而函数类型和数组类型类似，做右值使用时自动转换成函数指针类型，所以可以直接赋给`f`，当然也可以写成`void (*f)(const char *) = &say_hello;`，把函数`say_hello`先取地址再赋给`f`，就不需要自动类型转换了。
+
+可以直接通过函数指针调用函数，如上面的`f("Guys")`，也可以先用`*f`取出它所指的函数类型，再调用函数，即`(*f)("Guys")`。可以这么理解：函数调用运算符`()`要求操作数是函数指针，所以`f("Guys")`是最直接的写法，而`say_hello("Guys")`或`(*f)("Guys")`则是把函数类型自动转换成函数指针然后做函数调用。
+
+### 复杂声明
+
+如果把指针和数组、函数、结构体层层组合起来可以构成非常复杂的类型，下面看几个复杂的声明。
+
+```c
+typedef void (*sighandler_t)(int);
+sighandler_t signal(int signum, sighandler_t handler);
+```
+
+`sighandler_t`是一个函数指针，它所指向的函数带一个参数，返回值为`void`，`signal`是一个函数，它带两个参数，一个`int`参数，一个`sighandler_t`参数，返回值也是`sighandler_t`参数。如果把这两行合成一行写，就是：
+
+```c
+void (*signal(int signum, void (*handler)(int)))(int);
+```
+
+在分析复杂声明时，要借助`typedef`把复杂声明分解成几种基本形式：
+
+- `T *p;`，`p`是指向`T`类型的指针。
+- `T a[];`，`a`是由`T`类型的元素组成的数组，但有一个例外，如果`a`是函数的形参，则相当于`T *a;`
+- `T1 f(T2, T3...);`，`f`是一个函数，参数类型是`T2`、`T3`等等，返回值类型是`T1`。
+
+我们分解一下这个复杂声明：
+
+```c
+int (*(*fp)(void *))[10];
+```
+
+1、`fp`和`*`号括在一起，说明`fp`是一个指针，指向`T1`类型：
+
+```c
+typedef int (*T1(void *))[10];T1 *fp;
+```
+
+2、`T1`应该是一个函数类型，参数是`void *`，返回值是`T2`类型：
+
+```c
+typedef int (*T2)[10];typedef T2 T1(void *);T1 *fp;
+```
+
+3、`T2`和`*`号括在一起，应该也是个指针，指向`T3`类型：
+
+```c
+typedef int T3[10];typedef T3 *T2;typedef T2 T1(void *);T1 *fp;
+```
+
+显然，`T3`是一个`int`数组，由10个元素组成。分解完毕。
+
+
+
+### 回调函数
+
+如果参数是一个函数指针，调用者可以传递一个函数的地址给实现者，让实现者去调用它，这称为回调函数（Callback Function）。
+
+**回调函数示例：`void func(void (*f)(void *), void *p);`**
+
+| 调用者                                                       | 实现者                                                       |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| 提供一个回调函数，再提供一个准备传给回调函数的参数。把回调函数传给参数`f`，把准备传给回调函数的参数按`void *`类型传给参数`p` | 在适当的时候根据调用者传来的函数指针`f`调用回调函数，将调用者传来的参数`p`转交给回调函数，即调用`f(p);` |
+
+实现一个`repeat_three_times`函数，可以把调用者传来的任何回调函数连续执行三次。
+
+```c
+/* para_callback.h */
+#ifndef PARA_CALLBACK_H
+#define PARA_CALLBACK_H
+ 
+typedef void (*callback_t)(void *);//typedef为复杂的声明定义一个新的简单的别名。
+extern void repeat_three_times(callback_t, void *);
+ 
+#endif
+```
+
+```c++
+/* para_callback.c */
+#include "para_callback.h"
+ 
+void repeat_three_times(callback_t f, void *para)
+{
+     f(para);
+     f(para);
+     f(para);
+}
+```
+
+```c
+/* main.c */
+#include <stdio.h>
+#include "para_callback.h"
+ 
+void say_hello(void *str)
+{
+     printf("Hello %s\n", (const char *)str);
+}
+ 
+void count_numbers(void *num)
+{
+     int i;
+     for(i=1; i<=(int)num; i++)
+      printf("%d ", i);
+     putchar('\n');
+}
+ 
+int main(void)
+{
+     repeat_three_times(say_hello, "Guys");
+     repeat_three_times(count_numbers, (void *)4);
+     return 0;
+}
+```
+
+参数类型都是由实现者规定的。而本例中回调函数的参数按什么类型解释由调用者规定，对于实现者来说就是一个`void *`指针，实现者只负责将这个指针转交给回调函数，而不关心它到底指向什么数据类型。调用者知道自己传的参数是`char *`型的，那么在自己提供的回调函数中就应该知道参数要转换成`char *`型来解释。
+
+回调函数的一个典型应用就是实现类似C++的泛型算法（Generics Algorithm）。下面实现的`max`函数可以在任意一组对象中找出最大值，可以是一组`int`、一组`char`或者一组结构体，但是实现者并不知道怎样去比较两个对象的大小，调用者需要提供一个做比较操作的回调函数。
+
+**泛型算法**
+
+```c
+/* generics.h */
+#ifndef GENERICS_H
+#define GENERICS_H
+ 
+typedef int (*cmp_t)(void *, void *);
+extern void *max(void *data[], int num, cmp_t cmp);
+ 
+#endif
+```
+
+```c
+/* generics.c */
+#include "generics.h"
+ 
+void *max(void *data[], int num, cmp_t cmp)
+{
+     int i;
+     void *temp = data[0];
+     for(i=1; i<num; i++) {
+      if(cmp(temp, data[i])<0)
+           temp = data[i];
+     }
+     return temp;
+}
+```
+
+```c
+/* main.c */
+#include <stdio.h>
+#include "generics.h"
+ 
+typedef struct {
+     const char *name;
+     int score;
+} student_t;
+ 
+int cmp_student(void *a, void *b)
+{
+     if(((student_t *)a)->score > ((student_t *)b)->score)
+      return 1;
+     else if(((student_t *)a)->score == ((student_t *)b)->score)
+      return 0;
+     else
+      return -1;
+}
+ 
+int main(void)
+{
+     student_t list[4] = {{"Tom", 68}, {"Jerry", 72},
+               {"Moby", 60}, {"Kirby", 89}};
+     student_t *plist[4] = {&list[0], &list[1], &list[2], &list[3]};
+     student_t *pmax = max((void **)plist, 4, cmp_student);
+     printf("%s gets the highest score %d\n", pmax->name, pmax->score);
+ 
+     return 0;
+}
+```
+
+
+
+`max`函数之所以能对一组任意类型的对象进行操作，关键在于传给`max`的是指向对象的指针所构成的数组，而不是对象本身所构成的数组，这样`max`不必关心对象到底是什么类型，只需转给比较函数`cmp`，然后根据比较结果做相应操作即可，`cmp`是调用者提供的回调函数，调用者当然知道对象是什么类型以及如何比较。
+
+以上举例的回调函数是被同步调用的，调用者调用`max`函数，`max`函数则调用`cmp`函数，相当于调用者间接调了自己提供的回调函数。在实际系统中，异步调用也是回调函数的一种典型用法，调用者首先将回调函数传给实现者，实现者记住这个函数，这称为*注册*一个回调函数，然后当某个事件发生时实现者再调用先前注册的函数，比如`sigaction(2)`注册一个信号处理函数，当信号产生时由系统调用该函数进行处理，再比如`pthread_create(3)`注册一个线程函数，当发生调度时系统切换到新注册的线程函数中运行，在GUI编程中异步回调函数更是有普遍的应用，例如为某个按钮注册一个回调函数，当用户点击按钮时调用它。
+
+以下是一个代码框架。
+
+```
+/* registry.h */#ifndef REGISTRY_H#define REGISTRY_H typedef void (*registry_t)(void);extern void register_func(registry_t); #endif
+/* registry.c */#include <unistd.h>#include "registry.h" static registry_t func; void register_func(registry_t f){     func = f;} static void on_some_event(void){     ...     func();     ...}
+```
+
+既然参数可以是函数指针，返回值同样也可以是函数指针，因此可以有`func()();`这样的调用。返回函数的函数在C语言中很少见，在一些函数式编程语言（例如LISP）中则很常见，基本思想是把函数也当作一种数据来操作，输入、输出和参与运算，操作函数的函数称为高阶函数（High-order Function）。
+
 ## 内存模型和名称空间
 
 ### 预处理
