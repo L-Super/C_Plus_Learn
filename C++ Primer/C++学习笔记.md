@@ -1193,12 +1193,95 @@ int main(void)
 
 以下是一个代码框架。
 
-```
-/* registry.h */#ifndef REGISTRY_H#define REGISTRY_H typedef void (*registry_t)(void);extern void register_func(registry_t); #endif
-/* registry.c */#include <unistd.h>#include "registry.h" static registry_t func; void register_func(registry_t f){     func = f;} static void on_some_event(void){     ...     func();     ...}
+```c
+/* registry.h */
+#ifndef REGISTRY_H
+#define REGISTRY_H 
+typedef void (*registry_t)(void);
+extern void register_func(registry_t); 
+#endif
+/* registry.c */
+#include <unistd.h>
+#include "registry.h" 
+static registry_t func; 
+void register_func(registry_t f){     
+    func = f;} 
+static cvoid on_some_event(void){
+    ...     func();     ...}
 ```
 
 既然参数可以是函数指针，返回值同样也可以是函数指针，因此可以有`func()();`这样的调用。返回函数的函数在C语言中很少见，在一些函数式编程语言（例如LISP）中则很常见，基本思想是把函数也当作一种数据来操作，输入、输出和参与运算，操作函数的函数称为高阶函数（High-order Function）。
+
+### 内联函数和 constexpr 函数
+
+#### 内联函数
+
+**内联函数可避免函数调用的开销**
+
+将函数指定为内联函数(inline)， 通常就是将它在每个调用点上 “ 内联地 ” 展开。
+
+在shorterString函数的返回类型前面加上关键字inline, 这样就可以将它声明 成内联函数
+
+```c++
+//内联版本：寻找两个string对象中较短的那个
+inline const string & 
+shorterString(const string &s1, const string &s2) 
+{
+    return s1.size() <= s2.size() ? s1 : s2; 
+}
+```
+
+`cout << shorterString(s1, s2) << endl; `将在编译过程中展开成类似于下面的形式
+
+```c++
+cout << (s1.size() < s2.size() ? s1 : s2) << endl; 
+```
+
+从而消除了 shorterString函数的运行时开销。
+
+> 内联说明只是向编译器发出的一个请求，编译器可以忽略这个请求
+
+一般来说， 内联机制用千优化规模较小、流程直接、 频繁调用的函数。 
+
+#### constexpr函数
+
+constexpr函数（constexpr function）是指能用于常量表达式的函数。 定义constexpr函数要遵循几项约定：**函数的返回类型及所有形参的类型都得是字面值类型， 而且函数体中必须有且只有一条return语句。**
+
+```c++
+constexpr int new_sz () (return 42;) 
+constexpr int foo = new_sz () ; //正确： foo是一个常量表达式
+```
+
+我们把new_sz 定义成无参数的 constexpr 函数。 因为编译器能在程序编译时验证 new_sz函数返回的是常量表达式， 所以可以用new_sz函数初始化constexpr类型的变量foo。
+
+执行该初始化任务时， 编译器把对constexpr函数的调用替换成其结果值。为了能在编译过程中随时展开，constexpr函数被隐式地指定为内联函数。
+
+constexpr函数体内也可以包含其他语句，只要这些语句在运行时不执行任何操作就行。 例如，constexpr函数中可以有空语句、 类型别名以及using声明。
+
+我们允许constexpr函数的返回值并非一个常量：
+
+```c++
+//如果arg是常量表达式，则scale(arg)也是常量表达式
+constexpr size_t scale(size_t cnt) { return new_sz() * cnt;}
+```
+
+当scale 的实参是常量表达式时， 它的返回值也是常量表达式； 反之则不然：
+
+```c++
+int arr[scale(2) ]; //正确： scale(2)是常量表达式
+int i= 2; 			// i不是常量表达式
+int a2[scale(i)];	//错误： scale(i)不是常量表达式
+```
+
+当scale函数传入形如字面值2的常量表达式时，它的返回值也是常量表达式。此时，编译器用相应的结果替换scale函数的调用。
+
+> constexpr函数不一定返回常量表达式。
+
+**把内联函数和constexpr函数通常放在头文件内**
+
+### 重载函数
+
+
 
 ## 内存模型和名称空间
 
