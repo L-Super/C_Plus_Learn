@@ -1281,9 +1281,81 @@ int a2[scale(i)];	//错误： scale(i)不是常量表达式
 
 ### 重载函数
 
+如果同一作用域内的几个函数名字相同，但形参列表不同， 我们称之为重载(overloaded)函数。
 
+> main函数不能重载。
+
+不允许两个函数除了返回类型外其他所有的要素都相同。
+
+```c++
+Record lookup(const Account&); 
+bool lookup(const Account&）；//错误：与上一个函数相比只有返回类型不同
+```
+
+#### 重载和 const形参
+
+顶层const 不影响传入函数的对象。一个拥有顶层const的形参无法和另一个没有顶层const的形参区分开来：
+
+```c++
+Record lookup(Phone); 
+Record lookup(const Phone);//重复声明了Record lookup(Phone)
+Record lookup (Phone*) ; 
+Record lookup(Phone* const）；//重复声明了Record lookup(Phone*)
+```
+
+如果形参是某种类型的指针或引用，则通过区分其指向的是常量对象还是非常量对象可以实现函数重载， 此时的const是底层的
+
+```C++
+ecord lookup(Account&); //函数作用于Account的引用
+Record lookup(const Account&);//新函数 作用于常量引用
+Record lookup(Account*); //新 作用于指向Account的指针 
+Record lookup(const Account*);//新 作用于指向常量的指针
+```
+
+编译器可以通过实参是否是常量来推断应该调用哪个函数。
+
+因为const 不能转换成其他类型， 所以我们只能把const对象（或指向const的指针）传递给const形参。 相反的， 因为非常量可以转换成const, 所以上面的4个函数都能作用于非常量对象或者指向非常量对象的指针。 
+
+#### const_cast 和重载
+
+const_cast在重载函数的情景中最有用 。
+
+```c++
+//比较两个string对象的长度， 返回较短的那个引用
+const string &shorterString(const string &s1, const string &s2) 
+{
+    return s1.size() <= s2.size() ? sl : s2; 
+}
+```
+
+这个函数的参数和返回类型都是 const string的引用。 我们可以对两个非常量的 string实参调用这个函数， 但返回的结果仍然是const string的引用。因此我们需一种新的 shorterString函数， 当它的实参不是常量时， 得到的结果是一个普通的引用，使用const_cast可以做到这一点：
+
+```c++
+string &shorterString(string &s1, string &s2)
+{
+    auto &r = shorterString(const_cast<const string&>(sl), 
+                            const_cast<const string&>(s2)); 
+
+    return const_cast<string&>(r); 
+}
+```
+
+在这个版本的函数中，首先将它的实参强制转换成对 const的引用， 然后调用了 shorterString函数的const版本。const版本返回对conststring的引用， 这个引用事实上绑定在了某个初始的非常量实参上。 因此，我们可以再将其转换回一个普通的string&, 这显然是安全的 。
+
+#### 调用重载函数
+
+**函数匹配**(function matching)是指一个过程， 在这个过程中我们把函数调用与一组重载函数中的某一个关联
+起来，**函数匹配**也叫做**重载确定**(overload resolution)。编译器首先将调用的实参与重载集合中每一个函数的形参进行比较， 然后根据比较的结果决定到底调用哪个函数。
+
+当调用重载函数时有三种可能的结果：
+
++ 编译器找到一个与实参最佳匹配(best match)的函数， 并生成调用该函数的代码。
++ 找不到任何一个函数与调用的实参匹配，此时编译器发出无匹配(no match)的错误信息。
++ 有多于一个函数可以匹配，但是每一个都不是明显的最佳选择。此时也将发生错误，称为**二义性调用**(ambiguous call)。
 
 ## 内存模型和名称空间
+
+
 
 ### 预处理
 
