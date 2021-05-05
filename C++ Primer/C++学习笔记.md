@@ -2240,6 +2240,190 @@ deque内部有个**中控器**，维护每段缓冲区中的内容，缓冲区�
 
 * deque容器的迭代器也是支持随机访问的
 
+### Stack
+
+一个先进后出（FILO(last in first out)）的数据结构。
+
+![clip_image002-1547604555425](C++学习笔记.assets/clip_image002-1547604555425.jpg)
+
+
+
+栈中只有顶端的元素才可以被外界使用，因此栈不允许有遍历行为
+
+栈中进入数据称为  --- **入栈**  `push`
+
+栈中弹出数据称为  --- **出栈**  `pop`
+
+构造函数：
+
+* `stack<T> stk;`                                 //stack采用类模板实现， stack对象的默认构造形式
+* `stack(const stack &stk);`            //拷贝构造函数
+
+赋值操作：
+
+* `stack& operator=(const stack &stk);`           //重载等号操作符
+
+
+
+| push(elem) | 向栈顶添加元素       |
+| ---------- | -------------------- |
+| pop()      | 从栈顶移除第一个元素 |
+| top()      | 返回栈顶元素         |
+| empty()    | 判断堆栈是否为空     |
+| size();    | 返回栈的大小         |
+
+```c++
+#include <stack>
+//栈容器常用接口
+void test01()
+{
+	//创建栈容器 栈容器必须符合先进后出
+	stack<int> s;
+	//向栈中添加元素，叫做 压栈 入栈
+	s.push(10);
+	s.push(20);
+	s.push(30);
+	while (!s.empty()) {
+		//输出栈顶元素
+		cout << "栈顶元素为： " << s.top() << endl;
+		//弹出栈顶元素
+		s.pop();
+	}
+	cout << "栈的大小为：" << s.size() << endl;
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+
+### Queue
+
+Queue是一种**先进先出**(First In First Out,FIFO)的数据结构，它有两个出口
+
+![clip_image002-1547606475892](C++学习笔记.assets/clip_image002-1547606475892.jpg)
+
+队列容器允许从一端新增元素，从另一端移除元素
+
+队列中只有队头和队尾才可以被外界使用，因此队列不允许有遍历行为
+
+队列中进数据称为 --- **入队**    `push`
+
+队列中出数据称为 --- **出队**    `pop`
+
+构造函数：
+
+- `queue<T> que;`                                 //queue采用模板类实现，queue对象的默认构造形式
+- `queue(const queue &que);`            //拷贝构造函数
+
+赋值操作：
+
+- `queue& operator=(const queue &que);`           //重载等号操作符
+
+| push(elem) | 向栈顶添加元素       |
+| ---------- | -------------------- |
+| pop()      | 从栈顶移除第一个元素 |
+| back()     | 返回最后一个元素     |
+| front()    | 返回第一个元素       |
+| empty()    | 判断堆栈是否为空     |
+| size();    | 返回栈的大小         |
+
+### List
+
+**链表**（list）是一种物理存储单元上非连续的存储结构，数据元素的逻辑顺序是通过链表中的指针链接实现的。
+
+将数据进行链式存储。
+
+链表的组成：链表由一系列**结点**组成。而结点的组成：一个是存储数据元素的**数据域**，另一个是存储下一个结点地址的**指针域**
+
+STL中的链表是一个双向循环链表
+
+
+
+![说明: 2015-11-15_225145](C++学习笔记.assets/clip_image002-1547608564071.jpg)
+
+由于链表的存储方式并不是连续的内存空间，因此链表list中的迭代器只支持前移和后移，属于**双向迭代器**
+
+
+
+list的优点：
+
+* 采用动态存储分配，不会造成内存浪费和溢出
+* 链表执行插入和删除操作十分方便，修改指针即可，不需要移动大量元素
+
+list的缺点：
+
+* 链表灵活，但是空间(指针域) 和 时间（遍历）额外耗费较大
+
+
+
+List有一个重要的性质，**插入操作和删除操作都不会造成原有list迭代器的失效**，这在vector是不成立的。
+
+|成员函数|作用|
+| ---- | ---- |
+|front()|返回第一个元素。|
+|back()|返回最后一个元素。|
+|  assign(beg, end)    |  将[beg, end)区间中的数据拷贝赋值给本身。    |
+|  assign(n, elem)    |   将n个elem拷贝赋值给本身。   |
+|  swap(lst)    |    将lst与本身的元素互换。  |
+|   size()   |   返回容器中元素的个数   |
+|empty() | 判断容器是否为空 |
+|resize(num)<br />resize(num, elem) |重新指定容器的长度为num，若容器变长，则以默认值填充新位置。如果容器变短，则末尾超出容器长度的元素被删除。<br />重新指定容器的长度为num，若容器变长，则以elem值填充新位置。|
+| push_back(elem)|在容器尾部加入一个元素 |
+|push_front(elem) |在容器开头插入一个元素 |
+| pop_back()| 删除容器中最后一个元素|
+|  pop_front()| 从容器开头移除第一个元素|
+|insert(pos,elem)<br />insert(pos,n,elem)<br />insert(pos,beg,end)|在pos位置插elem元素的拷贝，返回新数据的位置。<br />在pos位置插入n个elem数据，无返回值。<br />在pos位置插入[beg,end)区间的数据，无返回值。|
+|clear()|移除容器的所有数据|
+| erase(beg,end)<br />erase(pos) |删除[beg,end)区间的数据，返回下一个数据的位置。<br />删除pos位置的数据，返回下一个数据的位置。|
+| remove(elem)|删除容器中所有与elem值匹配的元素。|
+
+
+
+```c++
+list<int>L1;
+L1.push_back(10);
+L1.push_back(20);
+list<int>L2;
+L2.assign(10, 100);//10个100赋值给L2
+L1.swap(L2);//交换L1，L2值
+```
+#### list 反转和排序
+**函数原型：**
+
+* `reverse();`   //反转链表
+* `sort();`        //链表排序
+
+```c++
+bool myCompare(int val1 , int val2)
+{
+	return val1 > val2;
+}
+//反转和排序
+void test01()
+{
+	list<int> L;
+	L.push_back(90);
+	L.push_back(30);
+	L.push_back(20);
+	L.push_back(70);
+
+	//反转容器的元素
+	L.reverse();
+	//排序
+//所有不支持随机访问迭代器的容器,不可以用标准算法
+//不支持随机访问迭代器的容器,内部会提供对应一些算法
+//sort (Ll. begin, Ll. end) x
+	L.sort(); //默认的排序规则 从小到大
+	L.sort(myCompare); //指定规则，从大到小
+}
+int main() {
+	test01();
+	return 0;
+}
+```
+
 
 
 ### 迭代器
