@@ -1433,9 +1433,9 @@ string &shorterString(string &s1, string &s2)
 + 找不到任何一个函数与调用的实参匹配，此时编译器发出无匹配(no match)的错误信息。
 + 有多于一个函数可以匹配，但是每一个都不是明显的最佳选择。此时也将发生错误，称为**二义性调用**(ambiguous call)。
 
+
+
 ## 内存模型和名称空间
-
-
 
 ### 预处理
 
@@ -2504,15 +2504,119 @@ int main() {
 	return 0;
 }
 ```
-=======
-### Stack
+### Set
 
- Stack（栈）先进后出（FILO(last in first out) ）的数据结构。
->>>>>>> Stashed changes
+**简介：**
 
+* 所有元素都会在插入时自动被排序
 
+**本质：**
 
-### 迭代器
+* set/multiset属于**关联式容器**，底层结构是用**二叉树**实现。
+
+**set和multiset区别**：
+
+* set不允许容器中有重复的元素
+* multiset允许容器中有重复的元素
+
+**set查找统计**
+
+* `find(key);`                  //查找key是否存在,若存在，返回该键的元素的迭代器；若不存在，返回set.end();
+* `count(key);`                //统计key的元素个数
+
+#### set容器排序
+
+set容器默认排序规则为从小到大，利用仿函数，可以改变排序规则
+
+**set存放内置数据类型**
+
+```C++
+#include <set>
+
+class MyCompare 
+{
+public:
+	bool operator()(int v1, int v2) const
+    {
+		return v1 > v2;
+	}
+};
+void test01() 
+{    
+	//指定排序规则
+	set<int,MyCompare> s2;
+	s2.insert(10);
+	s2.insert(40);
+	s2.insert(20);
+	s2.insert(30);
+	s2.insert(50);
+
+	for (set<int, MyCompare>::iterator it = s2.begin(); it != s2.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+
+总结：利用仿函数可以指定set容器的排序规则
+
+**set存放自定义数据类型**
+
+```C++
+#include <set>
+#include <string>
+
+class Person
+{
+public:
+	Person(string name, int age)：m_Name(name),m_Age(age)
+	{}
+	string m_Name;
+	int m_Age;
+
+};
+class comparePerson
+{
+public:
+	bool operator()(const Person& p1, const Person &p2) const
+	{
+		//按照年龄进行排序  降序
+		return p1.m_Age > p2.m_Age;
+	}
+};
+void test01()
+{
+	set<Person, comparePerson> s;
+	Person p1("刘备", 23);
+	Person p2("关羽", 27);
+	Person p3("张飞", 25);
+	Person p4("赵云", 21);
+	s.insert(p1);
+	s.insert(p2);
+	s.insert(p3);
+	s.insert(p4);
+
+	for (set<Person, comparePerson>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		cout << "姓名： " << it->m_Name << " 年龄： " << it->m_Age << endl;
+	}
+}
+int main() {
+	test01();
+	return 0;
+}
+```
+
+总结：
+
+对于自定义数据类型，set必须指定排序规则才可以插入数据
+
+### 迭代器 
 
 迭代器(iterator)，即容器和算法之间粘合剂。**可理解为指针。**
 
