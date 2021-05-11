@@ -1611,6 +1611,12 @@ int main(){
 
 ## 类和对象
 
+类的基本思想是**数据抽象( data abstraction)和封装( encapsulation)**。数据抽象是一种依赖于**接口( interface)和实现（implementation）**分离的编程（以及设计）技术。类的接口包括用户所能执行的操作：类的实现则包括类的数据成员、负责接口实现的函数体以及定义类所需的各种私有函数。
+
+封装实现了类的接口和实现的分离。封装后的类隐藏了它的实现细节,也就是说,类的用户只能使用接口而无法访问实现部分。
+
+类要想实现数据抽象和封装，需要首先定义一个**抽象数据类型( abstract data type)。**在抽象数据类型中,由类的设计者负责考虑类的实现过程；使用该类的程序员则只需要抽象地思考类型做了什么，而无须了解类型的工作细节。
+
 ![img](https://www.runoob.com/wp-content/uploads/2015/05/cpp-classes-objects-2020-12-10-11.png)
 
 ```c++
@@ -1636,9 +1642,11 @@ void SetName(char szName);
 };
 ```
 
+> 使用class和struct定义类唯一的区别就是默认的访问权限。
+
 ### 构造函数
 
-构造函数的名称与类的名称是完全相同的，并且不会返回任何类型，也不会返回 void。构造函数可用于为某些成员变量设置初始值。
+构造函数的名称与类的名称是完全相同的，并且不会返回任何类型，也不会返回 void。构造函数用于初始化类对象的数据成员。
 
 ++++
 
@@ -1649,6 +1657,24 @@ void SetName(char szName);
 3. 如果定义类时没写构造函数,则编译器生成一个默认的无参数
    的构造函数
    + 默认构造函数无参数,不做任何操作
+
+#### 默认构造函数
+
+类通过一个特殊的构造函数来控制默认初始化过程，这个函数叫**默认构造函数（default constructor）**。默认构造函数无需任何实参。
+
+> 只有当类没有声明任何构造函数时,编译器才会自动地生成默认构造函数。
+
+一旦我们定义了一些其他的构造函数,那么除非我们再定义一个默认的构造函数,否则类将没有默认构造函数。
+
+```c++
+Sales_data()=default;
+```
+
+在C++11中,如果我们需要默认的行为,那么可以通过在参数列表后面写上`= default`来生成构造函数。
+
+`= default`既可以和声明一起出现在类的内部,也可以作为定义出现在类的外部。
+
+和其他函数一样,如果`= default`在类的内部,则默认构造函数是内联的;如果它在类的外部,则该成员默认情况下不是内联的。
 
 #### 构造函数的分类及调用
 
@@ -1769,6 +1795,10 @@ Sales_item::Sales_item(const string &book)
 
 #### 拷贝构造函数
 
+一般来说，编译器生成的版本将对对象的每个成员执行拷贝，赋值和销毁操作。
+
+当类分配类对象之外的资源时，会失效。如，管理动态内存的类。
+
 
 
 ### 析构函数
@@ -1777,7 +1807,146 @@ Sales_item::Sales_item(const string &book)
 
 析构函数的名称与类的名称是完全相同的，只是在前面加了个波浪号（~）作为前缀，它不会返回任何值，也不能带有任何参数。析构函数有助于在跳出程序（比如关闭文件、释放内存等）前释放资源。
 
+### 友元
 
+类可以允许其他类或者函数访问它的非公有成员，方法是令其他类型或函数成为它的友元（friend）。
+
+```c++
+class Sales data{
+//为 Sales data的非成员函数所做的友元声明
+friend Sales_data add (const Sales_data&, const Sales_data&);
+friend std::istream &read(std::istream&, Sales_data&);
+friend std::ostream &print(std::ostream&, const Sales_data&);
+//其他成员及访问说明符与之前一致
+public:
+    Sales_data()= default;
+    Sales_data(const std::string &s, unsigned n, double p):
+    	bookNo(s), units_sold(n), revenue(p*n){}
+    Sales_ data(const std::string &s):bookNo(s) {}
+    Sales_data(std: istream&);
+    std::string isbn() const {return bookNo;}
+    Sales_data &combine(const Sales_data&);
+private:
+    std::string bookNo;
+    unsigned units_sold =0;
+    double revenue =0.0;
+}；
+//Sales_data接口的非成员组成部分的声明
+Sales_data add(const Sales_data&, const Sales_data&);
+std::istream &read(std::istream&, Sales_data&);
+std::ostream &print(std::ostream&, const Sales_data&);
+```
+
+友元声明只能出现在类定义的内部，但是类内的具体位置不限。
+
+> 一般来说，最好在类定义开始或者结束前的位置集中声明友元。
+
+ #### 友元的声明
+
+友元的声明仅仅指定了访问的权限。如果调用某个友元函数,那么我们就必须在友元声明之外再专门对函数进行一次
+声明。
+
+为了使友元对类的用户可见,我们通常把友元的声明与类本身放置在同一个头文件中（类的外部）。因此,我们的 Sales data头文件应该为read、 print和add提供独立的声明（除了类内部的友元声明之外）
+
+一些编译器允许在尚无友元函数的初始声明的情况下就调用它。不过即使你的编译器支持这种行为，最好还是提供一个独立的函数声明。
+
+#### 类之间的友元关系
+
+例如,假设我们需要为 Window_mgr添加一个名为clear的成员，它负责把一个指定的 Screen的内容都设为空白。为了完成这一任务，clear需要访问 Screen的私有成员;而要想令这种访问合法, Screen需要把 Window_mgr指定成它的友元。
+
+```c++
+class Screen{
+    // Window_mgr的成员可以访问 Screen类的私有部分
+    friend class window_mgr;
+    // Screen类的剩余部分
+};
+```
+
+如果一个类指定了友元类，则友元类的成员函数可以访问此类包括非公有成员在内的所有成员。通过上面的声明, Window_mgr被指定为 screen的友元,因此我们可以将Window_mgr的clear成员写成如下的形式:
+
+```c++
+class window mgr{
+public:
+    //窗口中每个屏幕的编号
+	using ScreenIndex = std::vector<Screen>::size_type;
+    //按照编号将指定的 Screen重置为空白
+	void clear(screenIndex)
+private:
+	std::vector<Screen> screens{Screen(24, 80,' ')}
+};
+void window_mgr::clear(ScreenIndex i)
+{
+    //s是一个 Screen的引用,指向我们想清空的那个屏幕
+	Screen &s= screens [i];
+	//将那个选定的 Screen重置为空白
+	s.contents string(s.height * s.width,' ');
+}
+```
+
+开始，首先把s定义成 screens vector中第i个位置上的 Screen的引用，随后利用 Screen的 height和 width成员计算出一个新的string对象,并令其含有若干个空白字符,最后我们把这个含有很多空白的字符串赋给 contents成员。
+
+注意，友元关系不存在传递性。也就是说，如果 Window_mgr有它自己的友元，则这些友元并不能具有访问 Screen的特权。
+
+> 每个类负责控制自己的友元类或友元函数。
+
+##### 令成员函数作为友元
+
+除了令整个 Window_mgr作为友元之外，Screen还可以只为clear提供访问权限。
+当把一个成员函数声明成友元时，我们必须明确指出该成员函数属于哪个类:
+
+```c++
+class Screen{
+    //Window_mgr:: clear必须在 Screen类之前被声明
+	friend void Window_mgr::clear(ScreenIndex)
+	//Screen类的剩余部分
+}；
+```
+
+要想令某个成员函数作为友元，我们必须仔细组织程序的结构以满足声明和定义的彼此依赖关系。在这个例子中,我们必须按照如下方式设计程序：
+
++ 首先定义 Window_mgr类,其中声明clear函数，但是不能定义它。在clear使用 Screen的成员之前必须先声明 screen
++ 接下来定义 Screen，包括对于 clear的友元声明
++ 最后定义clear，此时它才可以使用 Screen的成员。
+
+#### 函数重载和友元
+
+如果一个类想把一组重载函数声明成它的友元，它需要对这组函数中的每一个分别声明：
+
+```c++
+//重载的 stored函数
+extern std::ostream& storeOn (std::ostream &,Screen &);
+extern BitMap& storeOn(BitMap &,Screen &);
+class Screen{
+    //stored的 ostream版本能访问 Screen对象的私有部分
+	friend std::ostream& storeOn(std::ostream &,Screen &);
+    //....
+};
+
+```
+
+Screen类把接受 ostream&的 storeOn函数声明成它的友元，但是接受 BitMap作为参数的版本仍然不能访问 Screen。
+
+#### 友元声明和作用域
+
+类和非成员函数的声明不是必须在它们的友元声明之前。当一个名字第一次出现在一个友元声明中时，我们隐式地假定该名字在当前作用域中是可见的。然而，友元本身不一定真的声明在当前作用域中。
+
+甚至就算在类的内部定义该函数，我们也必须在类的外部提供相应的声明从而使得函数可见。换句话说，即使我们仅仅是用声明友元的类的成员调用该友元函数,它也必须是被声明过的:
+
+```c++
+struct X{
+    friend void f(){/*友元函数可以定义在类的内部*/} //在类内进行定义
+    x() {f();} //错误:f还没有被声明
+    void g();
+	void h();  
+};
+
+void x::g() {return f();} //错误:f还没有被声明
+void f(); //声明那个定义在x中的函数
+void X::h() {return f();}//正确:现在f的声明在作用域中了
+```
+
+
+关于这段代码最重要的是理解友元声明的作用是影响访问权限,它本身并非普通意义上的声明。
 
 ## 模板 (template)
 
@@ -2615,6 +2784,10 @@ int main() {
 总结：
 
 对于自定义数据类型，set必须指定排序规则才可以插入数据
+
+### Map
+
+一种以键-值(key-value)存储的数据类型。
 
 ### 迭代器 
 
