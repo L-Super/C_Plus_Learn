@@ -5,3 +5,4 @@ fileIO data/add_item data/sstream
 sstream < data/sstream
 
 for %%i in (  buf.exe clearIO.exe ) do %%i
+pause

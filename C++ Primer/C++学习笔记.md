@@ -1328,7 +1328,7 @@ cout << (s1.size() < s2.size() ? s1 : s2) << endl;
 constexpr函数（constexpr function）是指能用于常量表达式的函数。 定义constexpr函数要遵循几项约定：**函数的返回类型及所有形参的类型都得是字面值类型， 而且函数体中必须有且只有一条return语句。**
 
 ```c++
-constexpr int new_sz () (return 42;) 
+constexpr int new_sz () {return 42;} 
 constexpr int foo = new_sz () ; //正确： foo是一个常量表达式
 ```
 
