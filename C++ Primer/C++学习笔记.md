@@ -2746,8 +2746,7 @@ while (getline(cin, line))
 
 `auto len = line.size(); // len的类型是string::size_type `
 
-由千size函数返回的是一个无符号整型数，因此切记，如果在表达式中混用了带符
-号数和无符号数将可能产生意想不到的结果。例如，假设n是一个具有负值的int,则表达式s.size()<n的判断结果几乎肯定是true。这是因为负值n会自动地转换成一个比较大的无符号值。
+由千size函数返回的是一个无符号整型数，因此切记，如果在表达式中混用了带符号数和无符号数将可能产生意想不到的结果。例如，假设n是一个具有负值的int,则表达式s.size()<n的判断结果几乎肯定是true。这是因为负值n会自动地转换成一个比较大的无符号值。
 
 #### 字面值和string对象相加
 
@@ -2800,6 +2799,21 @@ cctype头文件中的函数
 | isxdigit(c) | 当c是十六进制数字时为真                                      |
 | tolower(c)  | 如果c是大写字母，输出对应的小写字母：否则原样输出c           |
 | toupper(c)  | 如果c是小写字母，输出对应的大写字母：否则原样输出c           |
+
+**去掉字符串中的首尾空格**
+
+```c++
+void trim(string &s)
+{
+    if( !s.empty() )
+    {
+        //删除首空格
+        s.erase(0,s.find_first_not_of(" "));
+        //删除最后一个字符之后的空格
+        s.erase(s.find_last_not_of(" ") + 1);
+    }
+}
+```
 
 #### 处理每个字符？使用基于范围的for语句
 
@@ -2903,6 +2917,54 @@ string类型支持顺序容器的赋值运算符以及 assign、 insert和 erase
 | s.replace( range,args) | 删除s中范围 range内的字符,替换为args指定的字符。 range或者是一个下标和一个长度,或者是一对指向s的迭代器。返回一个指向s的引用 |
 
 #### string的搜索操作
+
+每个搜索操作返回一个string::size_type值，表示匹配发生未知的下标。如果搜索失败，则返回一个string::npos的static成员。标准库将npos定义为一个const string::size_type类型，并初始化为-1.由于npos是一个unsigned类型，此初始值意味着npos等于任何string最大的可能的大小。
+
+| s.find(args)              | 查找s中args第一次出现的位置                   |
+| ------------------------- | --------------------------------------------- |
+| s.rfind(args)             | 查找s中args最后一次出现的位置                 |
+| s.find_first_of(args)     | 在s中查找arg中任何一个字符第一次出现的位置    |
+| s.find_last_of(args)      | 在s中查找args中任何一个字符最后一次出现的位置 |
+| s.find_first_not_of(args) | 在s中查找第一个不在args中的字符               |
+| s.find_last_not_of(args)  | 在s中查找最后一个不在args中的字符             |
+
+args必须是以下形式之一
+
++ c, pos	从s中位置pos开始査找字符c。pos默认为0
++ s2, pos	从s中位置pos开始查找字符串s2。pos默认为0
++ cp, pos  从s中位置pos开始查找指针cp指向的以空字符结尾的C风格字符串。pos默认为0
++ cp, pos, n 从s中位置pos开始查找指针cp指向的数组的前n个字符。pos和n无默认值
+
+```c++
+string name("AnnaBelle");
+auto pos1 = name.find("Anna"); //po1==0
+auto pos2 = name.find("anna"); //pos2==npos
+```
+
+pos1为0，子字符串“Anna”在“AnnaBelle”中第一次出现的下标。
+
+搜索（以及其他string操作）是大小写敏感的。pos2置为npos，因为Anna和anna不匹配。
+
+在字符串中循环地搜索子字符串出现的所有位置：
+
+```c++
+string name("0123456789"),name("r2d2");
+string::size_type pos = 0;
+//每步循环查找name中下一个数
+while((!pos name.find_first_of(numbers,pos)) != string::npos)
+{
+    cout<<"found number at index: "<<pos<<"element is"<<name[pos]<<endl;
+    ++pos;
+}
+```
+
+
+
+
+
+
+
+
 
 #### compare函数
 
