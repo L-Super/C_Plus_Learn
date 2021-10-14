@@ -2316,16 +2316,15 @@ std::ostream &print(std::ostream&, const Sales_data&);
 
  #### 友元的声明
 
-友元的声明仅仅指定了访问的权限。如果调用某个友元函数,那么我们就必须在友元声明之外再专门对函数进行一次
-声明。
+友元的声明仅仅指定了访问的权限。如果调用某个友元函数,那么我们就必须在友元声明之外再专门对函数进行一次声明。
 
-为了使友元对类的用户可见,我们通常把友元的声明与类本身放置在同一个头文件中（类的外部）。因此,我们的 Sales data头文件应该为read、 print和add提供独立的声明（除了类内部的友元声明之外）
+为了使友元对类的用户可见,我们通常把友元的声明与类本身放置在同一个头文件中（类的外部）。因此，我们的 Sales_data头文件应该为read、 print和add提供独立的声明（除了类内部的友元声明之外）
 
 一些编译器允许在尚无友元函数的初始声明的情况下就调用它。不过即使你的编译器支持这种行为，最好还是提供一个独立的函数声明。
 
 #### 类之间的友元关系
 
-例如,假设我们需要为 Window_mgr添加一个名为clear的成员，它负责把一个指定的 Screen的内容都设为空白。为了完成这一任务，clear需要访问 Screen的私有成员;而要想令这种访问合法, Screen需要把 Window_mgr指定成它的友元。
+例如，假设我们需要为 Window_mgr添加一个名为clear的成员，它负责把一个指定的 Screen的内容都设为空白。为了完成这一任务，clear需要访问 Screen的私有成员；而要想令这种访问合法, Screen需要把 Window_mgr指定成它的友元。
 
 ```c++
 class Screen{
@@ -2996,19 +2995,74 @@ while((!pos name.find_first_of(numbers,pos)) != string::npos)
 }
 ```
 
-
-
-
-
-
-
-
-
 #### compare函数
+
+类似strcmp，根据s是等于、大于还是小于参数指定的字符串，s.compare返回0、正数或负数。
+
+![img](C++学习笔记.assets/epub_33692196_1107.jpeg)
 
 #### 数值转换
 
+新标准引入了多个函数，可以实现数值数据与标准库string之间的转换：
 
+![img](C++学习笔记.assets/epub_33692196_1112.jpeg)
+
+#### stringstream
+
+C++引入了ostringstream、istringstream、stringstream这三个类，要使用他们创建对象就必须包含\<sstream>这个头文件。
+
++ istringstream类用于执行C++风格的串流的输入操作。
++ ostringstream类用于执行C风格的串流的输出操作。
++ strstream类同时可以支持C风格的串流的输入输出操作。
+
+istringstream可以读取一行字符串，然后以空格为分隔符把该行分隔开来。
+
+```C++
+#include<iostream>  
+#include<sstream>    //istringstream 必须包含这个头文件
+#include<string>  
+using namespace std;  
+int main()  
+{  
+    string str="i am a boy";  
+    istringstream is(str);  
+    string s;  
+    while(is>>s)  
+    {  
+        cout<<s<<endl;  
+    }  
+}
+```
+
+输出是:
+
+>i
+>
+>am
+>
+>a
+>
+>boy
+
+stringstream可以实现任意类型的转换
+
+int转string:
+
+```C++
+#include <string>
+#include <sstream>
+#include <iostream>
+
+int main()
+{
+    std::stringstream ostream;
+    std::string result;
+    int i = 1000;
+    ostream << i; //将int输入流
+    ostream >> result; //从stream中抽取前面插入的int值
+    std::cout << result << std::endl; // print the string "1000"
+}
+```
 
 
 
@@ -3441,6 +3495,123 @@ int main() {
 
 - map不允许容器中有重复key值元素
 - multimap允许容器中有重复key值元素
+
+单词计数程序：
+
+```c++
+//统计每个单词在输入中出现的次数
+map<string, size_t> word_count;// string到size_t的空map
+string word;
+while (cin > word)
+    ++word_count[word]; //提取word的计数器并将其加1
+for(const auto &w: word_count)//对map中的每个元素
+    //打印结果
+    cout << w.first << "occurs" << w.second
+        << ((w.second >1)? "times" : "time") << endl;
+```
+
+类似顺序容器，关联容器也是模板。为了定义一个map，我们必须指定关键字和值的类型。在此程序中，map保存的每个元素中，关键字是string类型，值是size_t类型。
+
+while循环每次从标准输入读取一个单词。它使用每个单词对word_count进行下标操作。如果word还未在map中，下标运算符会创建一个新元素，其关键字为word，值为0。不管元素是否是新创建的，我们将其值加1。
+
+可以对关联容器进行值初始化：
+
+```c++
+map< string, size_t> word_count;//空容器
+//列表初始化
+set<string> exclude = { "the", "but", "and", "or","an","a","The", "But", "And", "Or", "An", "A" };
+//三个元素; authors将姓映射为名
+map<string, string> authors{ {"Joyce", "James"},{"Austen", "Jane"},{"Dickens","Charles"} };
+```
+
+### pair类型
+
+pair的标准库类型，它定义在头文件utility中。
+
+一个pair保存两个数据成员。类似容器，pair是一个用来生成特定类型的模板。当创建一个pair时，我们必须提供两个类型名，pair的数据成员将具有对应的类型。
+
+```c++
+pair<string, string> anon; //保存两个 string
+
+pair<string, size_t> word_count; //保存一个 string和size_t
+
+pair<string, vector<int>> line; //保存 string和 vector<int>
+```
+
+可以为每个成员提供初始化器：
+
+```c++
+pair<string,string> author{"James", "Joy"};
+```
+
+pair的数据成员是public的。两个成员分别命名为first和second。我们用普通的成员访问符号来访问它们
+
+![image-20211014104140167](C++学习笔记.assets/image-20211014104140167.png)
+
+#### 创建pair对象的函数
+
+想象有一个函数需要返回一个pair。在新标准下，我们可以对返回值进行列表初始化
+
+```c++
+pair<string,int> process(vector<string> &v)
+{
+    // 处理v
+    if(!v.empty())
+    return {v.back(),v.back().size()}; // 列表初始化
+    else
+    return pair<string,int> (); //隐式构造返回值
+}
+```
+
+若v不为空，我们返回一个由v中最后一个string及其大小组成的pair。否则，隐式构造一个空pair，并返回它。
+
+还可以用make_pair来生成pair对象，pair的两个类型来自于make_pair的参数：
+
+```c++
+if(!v.empty())
+    return make_pair(v.back(),v.back.size());
+```
+
+### 关联容器的操作
+
+![img](C++学习笔记.assets/epub_33692196_1264.jpeg)
+
+对于set类型，key_type和value_type是一样的；set中保存的值就是关键字。在一个map中，元素是关键字-值对。即，每个元素是一个pair对象，包含一个关键字和一个关联的值。由于我们不能改变一个元素的关键字，因此这些pair的关键字部分是const的：
+
+![img](C++学习笔记.assets/epub_33692196_1265.jpeg)
+
+只有map类型（unordered_map、unordered_multimap、multimap和map）才定义了mapped_type。
+
+#### 关联容器迭代器
+
+当解引用一个关联容器迭代器时，我们会得到一个类型为容器的value_type的值的引用。对map而言，value_type是一个pair类型，其first成员保存const的关键字，second成员保存值：
+
+```c++
+//获得指向word_count中的一个元素的迭代器
+auto map_it = word_count.begin();
+// *map_it是指向一个pair<const string,size_t>对象的引用
+cout<<map_it->first; //打印此元素的关键字
+cout<<map_it->second; //打印该元素的值
+map_it->first = "new key"; //错误，关键字是const
+++map_it->second; //正确，可通过迭代器改变元素
+```
+
+**一个map的value_type是一个pair，我们可以改变pair的值，但不能改变关键字成员的值。**
+
+#### set的迭代器是const的
+
+虽然set类型同时定义了iterator和const_iterator类型，但两种类型都只允许只读访问set中的元素。
+
+```c++
+set<int> iset = {0,1,2,3,4};
+set<int>::iterator set_it = iset.begin();
+if(set_it != iset.end()){
+    *set_it = 42; //错误，set关键字是const
+    cout<<*set_it<<endl; //正确，可读
+}
+```
+
+
 
 ### 迭代器 
 
