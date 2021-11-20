@@ -1209,19 +1209,25 @@ int (*(*fp)(void *))[10];
 1、`fp`和`*`号括在一起，说明`fp`是一个指针，指向`T1`类型：
 
 ```c
-typedef int (*T1(void *))[10];T1 *fp;
+typedef int (*T1(void *))[10];
+T1 *fp;
 ```
 
 2、`T1`应该是一个函数类型，参数是`void *`，返回值是`T2`类型：
 
 ```c
-typedef int (*T2)[10];typedef T2 T1(void *);T1 *fp;
+typedef int (*T2)[10];
+typedef T2 T1(void *);
+T1 *fp;
 ```
 
 3、`T2`和`*`号括在一起，应该也是个指针，指向`T3`类型：
 
 ```c
-typedef int T3[10];typedef T3 *T2;typedef T2 T1(void *);T1 *fp;
+typedef int T3[10];
+typedef T3 *T2;
+typedef T2 T1(void *);
+T1 *fp;
 ```
 
 显然，`T3`是一个`int`数组，由10个元素组成。分解完毕。
@@ -1353,8 +1359,6 @@ int main(void)
      return 0;
 }
 ```
-
-
 
 `max`函数之所以能对一组任意类型的对象进行操作，关键在于传给`max`的是指向对象的指针所构成的数组，而不是对象本身所构成的数组，这样`max`不必关心对象到底是什么类型，只需转给比较函数`cmp`，然后根据比较结果做相应操作即可，`cmp`是调用者提供的回调函数，调用者当然知道对象是什么类型以及如何比较。
 
@@ -3840,6 +3844,24 @@ queue和 priority_queue适配器定义在 queue头文件中。
 >
 > 泛型算法的特性带来了一个编程假定:算法永远不会改变底层容器的大小。算法可能改变容器中保存的元素的值，也可能在容器内移动元素，但永远不会直接添加或删除元素。
 
+### 向算法传递函数
+
+#### 谓词
+
+**谓词是一个可调用的表达式，其返回结果是一个能用作条件的值。**标准库算法所使用的谓词分为两类：一元谓词（unary predicate，意味着它们只接受单一参数）和二元谓词（binary predicate，意味着它们有两个参数）。接受谓词参数的算法对输入序列中的元素调用谓词。因此，元素类型必须能转换为谓词的参数类型。
+
+接受一个二元谓词参数的sort版本用这个谓词代替<来比较元素。当前，我们只需知道，此操作必须在输入序列中所有可能的元素值上定义一个一致的序。我们定义的isShorter就是一个满足这些要求的函数，因此可以将isShorter传递给sort。这样做会将元素按大小重新排序：
+
+```c++
+// 比较函数，用来按长度排序单词
+bool isShorter(const string& s1, const string& s2)
+{
+    return s1.size() < s2.size();
+}
+// 按长度由短至长排序
+sort(words.begin(), words.end(), isShorter);
+```
+
 
 
 
@@ -3999,7 +4021,129 @@ IO操作一个与生俱来的问题是可能发生错误。一些错误是可恢
 
 ![image-20210526213406755](C++学习笔记.assets/image-20210526213406755.png)
 
+### bind函数
 
+定义在头文件functional中。可以将bind函数看作一个通用的函数适配器，它接受一个可调用对象，生成一个新的可调用对象来“适应”原对象的参数列表。
+
+调用bind的一般形式为：
+
+```c++
+auto newCallable = bind(callable, arg_list);
+```
+
+newCallable本身是一个可调用对象，arg_list是一个逗号分隔的参数列表，对应给定的callable的参数。即，当我们调用newCallable时，newCallable会调用callable，并传递给它arg_list中的参数。
+
+arg_list中的参数可能包含形如\_n的名字，其中n是一个整数。这些参数是“占位符”，表示newCallable的参数，它们占据了传递给newCallable的参数的“位置”。**数值n表示生成的可调用对象中参数的位置**：\_1为newCallable的第一个参数，_2为第二个参数，依此类推。
+
+```c++
+bool chekc_size(const string &s, string::size_type sz)
+{
+    return s.size() >= sz;
+}
+```
+
+**绑定check_size的sz参数**
+
+使用bind生成一个调用check_size的对象，如下所示，它用一个定值作为其大小参数来调用check_size：
+
+```c++
+// check6是一个可调用对象，接受一个string类型的参数
+// 并用此string和值6来调用check_size
+auto check6 = bind(check_size, _1, 6);
+```
+
+此bind调用只有一个占位符，表示check6只接受单一参数。占位符出现在arg_list的第一个位置，表示check6的此参数对应check_size的第一个参数。此参数是一个const string&。因此，调用check6必须传递给它一个string类型的参数，check6会将此参数传递给check_size。
+
+```c++
+string s = "hello";
+bool b1 = check6(s); // check6(s)会调用check_size(s,6)
+```
+
+使用bind，我们可以将原来基于lambda的find_if调用：
+
+```c++
+auto wc = find_if(words.begin(), words.end(), [sz](const string &a));
+```
+
+替换为如下使用check_size的版本：
+
+```c++
+auto wc = find_if(words.begin(), words.end(),bind(check_size, _1, sz));
+```
+
+此bind调用生成一个可调用对象，将check_size的第二个参数绑定到sz的值。当find_if对words中的string调用这个对象时，这些对象会调用check_size，将给定的string和sz传递给它。
+
+#### 使用placeholders名字
+
+名字\_n都定义在一个名为placeholders的命名空间中，而这个命名空间本身定义在std命名空间（参见3.1节，第74页）中。为了使用这些名字，两个命名空间都要写上。与我们的其他例子类似，对bind的调用代码假定之前已经恰当地使用了using声明。例如，_1对应的using声明为：
+
+```
+using std::placeholders::1;
+```
+
+此声明说明我们要使用的名字_1定义在命名空间placeholders中，而此命名空间又定义在命名空间std中。对每个占位符名字，我们都必须提供一个单独的using声明。编写这样的声明很烦人，也很容易出错。可以使用另外一种不同形式的using语句，而不是分别声明每个占位符，如下所示：
+
+```
+using namespace std::placeholders;
+```
+
+这种形式说明希望所有来自namespace_name的名字都可以在我们的程序中直接使用。使得由placeholders定义的所有名字都可用。与bind函数一样，placeholders命名空间也定义在functional头文件中。
+
+#### bind的参数
+
+我们可以用bind修正参数的值。也可以用bind绑定给定可调用对象中的参数或重新安排其顺序。例如，假定f是一个可调用对象，它有5个参数，则下面对bind的调用：
+
+```c++
+// g是一个有两个参数的可调用对象
+auto g = bind(f, a, b, _2, c, _1);
+```
+
+生成一个新的可调用对象，它有两个参数，分别用占位符_2和_1表示。这个新的可调用对象将它自己的参数作为第三个和第五个参数传递给f。f的第一个、第二个和第四个参数分别被绑定到给定的值a、b和c上。
+
+f作为最后一个参数，第二个参数将被传递给f作为第三个参数。
+
+即调用`g(X, Y)`会调用`f(a, b, Y, c, X)`
+
+用bind重排参数顺序下面是用bind重排参数顺序的一个具体例子，我们可以用bind颠倒isShroter的含义：
+
+```c++
+// 按单词长度由短至长排序
+sort(words.begin(), words.end(), isShorter);
+// 按单词长度由长至短排序
+sort(words.begin(), words.end(), bind(isShorter(_2, _1));
+```
+
+在第一个调用中，当sort需要比较两个元素A和B时，它会调用isShorter（A，B）。在第二个对sort的调用中，传递给isShorter的参数被交换过来了。因此，当sort比较两个元素时，就好像调用isShorter（B，A）一样。
+
+#### 绑定引用参数
+
+默认情况下，bind的那些不是占位符的参数被拷贝到bind返回的可调用对象中。但是，与lambda类似，有时对有些绑定的参数我们希望以引用方式传递，或是要绑定参数的类型无法拷贝。
+
+例如，为了替换一个引用方式捕获ostream的lambda：
+
+```c++
+// os是一个局部变量,引用一个输出流
+// c是一个局部变量,类型为char
+for_each(words begin(), words end(),
+[&os, c](const string &s) { os << s<< c;});
+```
+
+可以很容易地编写一个函数，完成相同的工作：
+
+```c++
+ostream &print(ostream &os, const string &s, char c)
+{
+    return os << s << c;
+}
+```
+
+但是，不能直接用bind来代替对os的捕获，原因在于bind拷贝其参数，而我们不能拷贝一个ostream。如果我们希望传递给bind一个对象而又不拷贝它，就必须使用标准库ref函数：
+
+```c++
+for_each(words.begin(), words.end(), bind(print, ref(os), _1, ' '));
+```
+
+**函数ref返回一个对象，包含给定的引用，此对象是可以拷贝的。**标准库中还有一个**cref函数，生成一个保存const引用的类。**与bind一样，函数ref和cref也定义在头文件functional中。
 
 ## Lambda表达式
 
@@ -4215,6 +4359,8 @@ Lambda表达式的参数和普通函数的参数类似，那么这里为什么�
 	f_display_42(44);
 　　}
 ```
+
+
 
 
 
