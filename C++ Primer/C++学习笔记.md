@@ -2882,7 +2882,7 @@ for(declaration : expression)
 string str("some string"); 
 //每行检出str中的一个字符，
 for (auto c : str) 
-COUt<< c << endl; 
+cout<< c << endl; 
 ```
 
 此例中，通过使用**auto**关键字让编译器来决定变量c的类型，这里c的类型是char。
@@ -2942,20 +2942,19 @@ str.at(1) = 'x';//字符修改,"hxllo world"
 
 **substr操作**
 
-substr操作返回一个 string，它是原始 string的一部分或全部
-的拷贝。可以传递给 substr一个可选的开始位置和计数值：
+substr操作返回一个 string，它是原始 string的一部分或全部的拷贝。可以传递给 substr一个可选的开始位置和计数值：
 
 ```c++
 string s("hello world");
 string s2 = s.substr (0,5); //s2=he11o
 string s3 = s.substr(6); // s3=world
-string s4 = s.substr(6, 11); // s4=world
+string s4 = s.substr(6, 11); // s4=world，从第6个位置开始，取11个字符
 string s5= s.substr(12); //抛出一个 out of range异常
 ```
 
 | 子字符串操作     |                                                              |
 | ---------------- | ------------------------------------------------------------ |
-| s.substr(pos, n) | 返回一个 string,包含s中从pos开始的n个字符的拷贝。pos的默认值为0。n的默认值为 s.size()-pos,即拷贝从pos开始的所有字符 |
+| s.substr(pos, n) | 返回一个 string,**包含s中从pos开始的n个字符的拷贝**。pos的默认值为0。n的默认值为 s.size()-pos,即拷贝从pos开始的所有字符 |
 
 string类型支持顺序容器的赋值运算符以及 assign、 insert和 erase操作。除此之外,它还定义了额外的 insert和 erase版本；string类定义了两个额外的成员函数: append和 replace。
 
