@@ -2272,11 +2272,18 @@ public:
 
 #### 拷贝构造函数
 
-一般来说，编译器生成的版本将对对象的每个成员执行拷贝，赋值和销毁操作。
+如果一个构造函数的第一个参数是自身类类型的引用，且任何额外参数都有默认值，则此构造函数是拷贝构造函数。
 
-当类分配类对象之外的资源时，会失效。如，管理动态内存的类。
+```c++
+class Foo{
+public:
+	Foo();//默认构造函数
+	Foo(const Foo&);//拷贝构造函数
+};
+```
 
-
+**合成拷贝构造函数**
+如果我们没有为一个类定义拷贝构造函数，编译器会为我们定义一个。
 
 ### 析构函数
 
@@ -3504,7 +3511,7 @@ int main() {
 
 * 可以根据key值快速找到value值
 
-**map和multimap****区别**：
+**map和multimap**区别：
 
 - map不允许容器中有重复key值元素
 - multimap允许容器中有重复key值元素
@@ -3536,6 +3543,19 @@ set<string> exclude = { "the", "but", "and", "or","an","a","The", "But", "And", 
 //三个元素; authors将姓映射为名
 map<string, string> authors{ {"Joyce", "James"},{"Austen", "Jane"},{"Dickens","Charles"} };
 ```
+
+### 无序容器
+
+C++ 11标准定义了4个无序关联容器(unordered associative container)，分别为 unordered_map、unordered_multimap、unordered_set 以及 unordered_multiset。这些容器不是使用比较运算符来组织元素，而是使用一个哈希函数(hash function)和关键字类型的==运算符。在关键字类型的元素没有明显的序关系的情况下，无序容器是非常有用的。在某些应用中，维护元素的序代价非常高昂，此时无序容器也很有用。
+
+
+
+| 无序容器           | 功能                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| unordered_map      | 存储键值对 <key, value> 类型的元素，其中各个键值对键的值不允许重复，且该容器中存储的键值对是无序的。 |
+| unordered_multimap | 和 unordered_map 唯一的区别在于，该容器允许存储多个键相同的键值对。 |
+| unordered_set      | 不再以键值对的形式存储数据，而是直接存储数据元素本身（当然也可以理解为，该容器存储的全部都是键 key 和值 value 相等的键值对，正因为它们相等，因此只存储 value 即可）。另外，该容器存储的元素不能重复，且容器内部存储的元素也是无序的。 |
+| unordered_multiset | 和 unordered_set 唯一的区别在于，该容器允许存储值相同的元素。 |
 
 ### pair类型
 
