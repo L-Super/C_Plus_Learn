@@ -2882,14 +2882,15 @@ for(declaration : expression)
 	statement
 ```
 
-
 其中，**declaration** 负责定义一个变量， 用于访问序列中的基础元素。每次迭代，**declaration**变量会被初始化为 **expression**的下一个元素值。**expression**是一个对象， 用于表示一个序列。
+
+注意：declaration它只是元素的引用，并不是迭代器，误混淆。
 
 ```c++
 string str("some string"); 
 //每行检出str中的一个字符，
 for (auto c : str) 
-cout<< c << endl; 
+	cout<< c << endl; 
 ```
 
 此例中，通过使用**auto**关键字让编译器来决定变量c的类型，这里c的类型是char。
@@ -3525,10 +3526,19 @@ string word;
 while (cin > word)
     ++word_count[word]; //提取word的计数器并将其加1
 for(const auto &w: word_count)//对map中的每个元素
-    //打印结果
+{    //打印结果
     cout << w.first << "occurs" << w.second
         << ((w.second >1)? "times" : "time") << endl;
+}
+
+//还可以使用结构化绑定遍历容器 C++17
+for (const auto& [occurs, times] : word_count)
+{
+		cout << occurs << times << endl;
+}
 ```
+
+> [结构化绑定](https://zh.cppreference.com/w/cpp/language/structured_binding)
 
 类似顺序容器，关联容器也是模板。为了定义一个map，我们必须指定关键字和值的类型。在此程序中，map保存的每个元素中，关键字是string类型，值是size_t类型。
 
@@ -3710,7 +3720,7 @@ vector<int>::iterator it;//it能读写vector<int>的元素
 string::iterator it2;//it2能读写string对象中的字符
 
 vector<int>::const_iterator it3;//it3只能读元素，不能写元素
-string::const_iteratorit4;//it4只能读字符，不能写字符
+string::const_iterator it4;//it4只能读字符，不能写字符
 ```
 
 const_iterator和常量指针（参见2.4.2节，第56页）差不多，能读取但不能修改它所指的元素值。相反，iterator的对象可读可写。
