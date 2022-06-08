@@ -32,7 +32,7 @@
 
 vector 也不例外，其实看了源码之后就发现，vector 相反是所有容器里面最简单的一种。
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class vector {
 public:
@@ -69,7 +69,7 @@ vector 有多个构造函数, 为了满足多种初始化。
 
 因为 vector 是一种 class template， 所以呢，我们并不需要手动的释放内存， 生命周期结束后就自动调用析构从而释放调用空间，当然我们也可以直接调用析构函数释放内存。
 
-```
+```c++
 void deallocate() {
  if (start) 
         data_allocator::deallocate(start, end_of_storage - start);
@@ -87,7 +87,7 @@ void deallocate() {
 
 这里需要注意的是因为 end() 返回的是 finish，而 finish 是指向**最后一个元素的后一个位置的指针**，所以使用 end() 的时候要注意。
 
-```
+```c++
 public:
  // 获取数据的开始以及结束位置的指针. 记住这里返回的是迭代器, 也就是 vector 迭代器就是该类型的指针.
     iterator begin() { return start; }
@@ -118,7 +118,7 @@ vector 的 push 和 pop 操作都只是对尾进行操作， 这里说的尾部�
 
 pop 元素：从尾端删除一个元素。
 
-```
+```c++
 public:
   //将尾端元素拿掉 并调整大小
   void pop_back() {
@@ -131,7 +131,7 @@ public:
 
 erase 函数清除指定位置的元素， 其重载函数用于清除一个范围内的所有元素。实际实现就是将删除元素后面所有元素往前移动，对于 vector 来说删除元素的操作开销还是很大的，所以说 vector 它不适合频繁的删除操作，毕竟它是一个数组。
 
-```
+```c++
 //清楚[first, last)中的所有元素
   iterator erase(iterator first, iterator last) {
       iterator i = copy(last, finish, first);
@@ -232,7 +232,7 @@ list 的节点结构如下图所示：
 
 __list_node 用来实现节点，数据结构中就储存前后指针和属性。
 
-```
+```c++
 template <class T> struct __list_node {
     // 前后指针
    typedef void* void_pointer;
@@ -247,7 +247,7 @@ template <class T> struct __list_node {
 
 基本类型
 
-```
+```c++
 template<class T, class Ref, class Ptr> struct __list_iterator {
    typedef __list_iterator<T, T&, T*>     iterator; // 迭代器
    typedef __list_iterator<T, const T&, const T*> const_iterator;
@@ -266,7 +266,7 @@ template<class T, class Ref, class Ptr> struct __list_iterator {
 
 构造函数
 
-```
+```c++
 template<class T, class Ref, class Ptr> struct __list_iterator {
     ...
     // 定义节点指针
@@ -282,7 +282,7 @@ template<class T, class Ref, class Ptr> struct __list_iterator {
 
 重载
 
-```
+```c++
 template<class T, class Ref, class Ptr> struct __list_iterator  {
     ...
  // 重载
@@ -320,7 +320,7 @@ list 自己定义了嵌套类型满足 traits 编程， list 迭代器是 bidire
 
 list 在定义 node 节点时， 定义的不是一个指针，这里要注意。
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class list {
 protected:
@@ -358,7 +358,7 @@ public:
 
 list 默认使用 alloc 作为空间配置器，并根据这个另外定义了一个 list_node_allocator，目的是更加方便以节点大小来配置单元。
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class list {
 protected:
@@ -369,7 +369,7 @@ protected:
 
 其中，list_node_allocator(n) 表示配置 n 个节点空间。以下四个函数，分别用来配置，释放，构造，销毁一个节点。
 
-```
+```c++
 class list {
 protected:
  // 配置一个节点并返回
@@ -401,7 +401,7 @@ protected:
 
 ### 基本属性获取
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class list {
     ...
@@ -453,7 +453,7 @@ inline void swap(list<T, Alloc>& x, list<T, Alloc>& y) {
 
 在 list 中，push 操作都调用 insert 函数， pop 操作都调用 erase 函数。
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class list {
     ...
@@ -472,7 +472,7 @@ class list {
 
 上面的两个插入函数内部调用的 insert 函数。
 
-```
+```c++
 class list {
     ...
 public:
@@ -501,7 +501,7 @@ list 是链表，所以链表怎么实现删除元素， list 就在怎么操作
 
 由于它是双向环状链表，只要把边界条件处理好，那么在头部或者尾部插入元素操作几乎是一样的，同样的道理，在头部或者尾部删除元素也是一样的。
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class list {
     ...
@@ -524,7 +524,7 @@ class list {
 
 list 内部提供一种所谓的迁移操作(transfer)：将某连续范围的元素迁移到某个特定位置之前，技术上实现其实不难，就是节点之间的指针移动，只要明白了这个函数的原理，后面的 splice，sort，merge 函数也就一一知晓了，我们来看一下 transfer 的源码：
 
-```
+```c++
 template <class T, class Alloc = alloc>
 class list {
     ...
@@ -618,7 +618,7 @@ deque 在逻辑上看起来是连续空间，内部确实是由一段一段的�
 
 deque 采用一块所谓的 map （注意不是 STL 里面的 map 容器）作为中控器，其实就是一小块连续空间，其中的每个元素都是指针，指向另外一段较大的连续线性空间，称之为**缓冲区。**在后面我们看到，缓冲区才是 deque 的储存空间主体。
 
-```
+```c++
 #ifndef __STL_NON_TYPE_TMPL_PARAM_BUG
 template <class T, class Ref, class Ptr, size_t BufSiz>
 class deque {
@@ -652,7 +652,7 @@ deque 是分段连续空间，维持其“整体连续”假象的任务，就�
 
 有了这样的思想准备之后，我们再来看源码，就显得容易理解一些了。
 
-```
+```c++
 template <class T, class Ref, class Ptr, size_t BufSiz>
 struct __deque_iterator {
  // 迭代器定义
@@ -677,7 +677,7 @@ struct __deque_iterator {
 
 deque 的每一个缓冲区由设计了三个迭代器（为什么这样设计？）
 
-```
+```c++
 struct __deque_iterator {
  ...
   typedef T value_type;
@@ -708,7 +708,7 @@ last 表示当前数组中尾的位置。
 
 那么，缓冲区大小是谁来决定的呢？这里呢，用来决定缓冲区大小的是一个全局函数:
 
-```
+```c++
 inline size_t __deque_buf_size(size_t n, size_t sz) {
   return n != 0 ? n : (sz < 512 ? size_t(512 / sz): size_t(1));
 }
@@ -738,7 +738,7 @@ inline size_t __deque_buf_size(size_t n, size_t sz) {
 
 operator++ 操作代表是需要切换到下一个元素，这里需要先切换再判断是否已经到达缓冲区的末尾。
 
-```
+```c++
 self& operator++() { 
   ++cur;      //切换至下一个元素
   if (cur == last) {   //如果已经到达所在缓冲区的末尾
@@ -751,7 +751,7 @@ self& operator++() {
 
 operator-- 操作代表切换到上一个元素所在的位置，需要先判断是否到达缓冲区的头部，再后退。
 
-```
+```c++
 self& operator--() {     
   if (cur == first) {    //如果已经到达所在缓冲区的头部
      set_node(node - 1); //切换前一个节点的最后一个元素
@@ -766,7 +766,7 @@ self& operator--() {
 
 deque 的构造函数有多个重载函数，接受大部分不同的参数类型，基本上每一个构造函数都会调用 create_map_and_nodes，这就是构造函数的核心，后面我们来分析这个函数的实现。
 
-```
+```c++
 template <class T, class Alloc = alloc, size_t BufSiz = 0> 
 class deque {
     ...
@@ -796,7 +796,7 @@ public:                         // Basic types
 
 下面我们来看一下 deque 的中控器是如何配置的。
 
-```
+```c++
 void deque<T,Alloc,BufSize>::create_map_and_nodes(size_type_num_elements) {
   //需要节点数= (每个元素/每个缓冲区可容纳的元素个数+1)
   //如果刚好整除，多配一个节点
@@ -820,7 +820,7 @@ void deque<T,Alloc,BufSize>::create_map_and_nodes(size_type_num_elements) {
 
 那 reallocate_map 又是如何操作的呢？这里先留个悬念。
 
-```
+```c++
 // 如果 map 尾端的节点备用空间不足，符合条件就配置一个新的map(配置更大的，拷贝原来的，释放原来的)
 void reserve_map_at_back (size_type nodes_to_add = 1) {
   if (nodes_to_add + 1 > map_size - (finish.node - map))
@@ -839,7 +839,7 @@ void reserve_map_at_front (size_type nodes_to_add = 1) {
 
 push 实现
 
-```
+```c++
 template <class T, class Alloc = alloc, size_t BufSiz = 0> 
 class deque {
     ...
@@ -870,7 +870,7 @@ public:                         // push_* and pop_*
 
 pop 实现
 
-```
+```c++
 template <class T, class Alloc = alloc, size_t BufSiz = 0> 
 class deque {
     ...
@@ -909,7 +909,7 @@ pop 和 push 都先调用了 reserve_map_at_XX 函数，这些函数主要是为
 
 deque 为了保证效率尽可能的高，就判断删除的位置是中间偏后还是中间偏前来进行移动。
 
-```
+```c++
 template <class T, class Alloc = alloc, size_t BufSiz = 0> 
 class deque {
     ...
@@ -1007,7 +1007,7 @@ deque 其实是在功能上合并了 vector 和 list。
 
 stack 的源码：
 
-```
+```c++
 #ifndef __STL_LIMITED_DEFAULT_TEMPLATES
 template <class T, class Sequence = deque<T> >
 #else
@@ -1025,7 +1025,7 @@ protected:
 
 queue 的源码：
 
-```
+```c++
 #ifndef __STL_LIMITED_DEFAULT_TEMPLATES
 template <class T, class Sequence = deque<T> >
 #else
@@ -1049,7 +1049,7 @@ protected:
 
 插入函数是 push_heap， heap 只接受 RandomAccessIterator 类型的迭代器。
 
-```
+```c++
 template <class RandomAccessIterator>
 inline void push_heap(RandomAccessIterator first, RandomAccessIterator last) {
   __push_heap_aux(first, last, distance_type(first), value_type(first));
@@ -1068,7 +1068,7 @@ pop 操作其实并没有真正意义去删除数据，而是将数据放在最�
 
  pop 的实现有两种，这里都罗列了出来，另一个传入的是 cmp 仿函数。
 
-```
+```c++
 template <class RandomAccessIterator, class Compare>
 inline void pop_heap(RandomAccessIterator first, RandomAccessIterator last,
                      Compare comp) {
@@ -1097,7 +1097,7 @@ inline void __pop_heap(RandomAccessIterator first, RandomAccessIterator last,
 
 make_heap 将数组变成堆存放
 
-```
+```c++
 template <class RandomAccessIterator>
 inline void make_heap(RandomAccessIterator first, RandomAccessIterator last) {
   __make_heap(first, last, value_type(first), distance_type(first));
@@ -1123,7 +1123,7 @@ void __make_heap(RandomAccessIterator first, RandomAccessIterator last, T*,
 
 其实就是每次将第一位数据弹出从而实现排序功。
 
-```
+```c++
 template <class RandomAccessIterator>
 void sort_heap(RandomAccessIterator first, RandomAccessIterator last) {
   while (last - first > 1) pop_heap(first, last--);
@@ -1147,7 +1147,7 @@ priority_queue 本身也不算是一个容器，它是**以 vector 为容器以 
 
 类型定义
 
-```
+```c++
 #ifndef __STL_LIMITED_DEFAULT_TEMPLATES
 template <class T, class Sequence = vector<T>, 
           class Compare = less<typename Sequence::value_type> >
@@ -1172,7 +1172,7 @@ protected:
 
 priority_queue 只有简单的 3 个属性获取的函数, 其本身的操作也很简单, 只是实现依赖了 vector 和 heap 就变得比较复杂。
 
-```
+```c++
 class  priority_queue {
  ...
 public:
@@ -1195,7 +1195,7 @@ priority_queue 本身实现是很复杂的，但是当我们已经了解过 vect
 
 好了，本期的内容就到这里了，我们下期再见。
 
-PS：看有多少人点赞，下期不定期更新关联式容器哦，先买个关子，下期有个硬核的内容带大家手撕红黑树源码，红黑树的应用可以说很广了，像 Java 集合中的 TreeSet 和 TreeMap、STL 中的 set 和 map、Linux 虚拟内存的管理都用到了哦。
+
 
 > 参考
 >
